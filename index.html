@@ -34,14 +34,17 @@
   .header-meta { font-family:var(--mono); font-size:.68rem; color:var(--subtext); }
 
   /* ── STORAGE BAR ── */
-  .storage-bar { background:#0f1218; border-bottom:1px solid var(--border); padding:8px 12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .bar-label { font-size:.6rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); flex-shrink:0; }
-  .pill { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border-radius:20px; cursor:pointer; font-size:.68rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; font-family:var(--head); border:1px solid; transition:all .2s; flex-shrink:0; }
-  .pill .dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
-  .pill.usb-off   { border-color:var(--muted); color:var(--muted); }
-  .pill.usb-on    { border-color:var(--green); color:var(--green); background:rgba(34,197,94,.1); }
-  .pill.drive-off { border-color:var(--muted); color:var(--muted); }
-  .pill.drive-on  { border-color:var(--purple); color:var(--purple); background:rgba(167,139,250,.1); }
+  .storage-bar { background:#0f1218; border-bottom:1px solid var(--border); padding:7px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .save-status { display:inline-flex; align-items:center; gap:6px; font-size:.68rem; font-family:var(--mono); color:var(--subtext); }
+  .save-dot { width:7px; height:7px; border-radius:50%; background:var(--muted); flex-shrink:0; transition:background .3s; }
+  .save-dot.linked { background:var(--green); box-shadow:0 0 6px rgba(34,197,94,.5); }
+  .btn-import { padding:5px 12px; border:1px solid var(--border); border-radius:20px; background:none; color:var(--subtext); font-size:.65rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; font-family:var(--head); cursor:pointer; }
+
+  /* ── RELINK BANNER ── */
+  .relink-banner { background:rgba(96,165,250,.08); border-bottom:1px solid rgba(96,165,250,.2); padding:9px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .relink-banner p { font-size:.74rem; color:var(--subtext); }
+  .relink-banner p strong { color:var(--blue); }
+  .btn-relink { padding:7px 14px; background:var(--blue); color:#000; border:none; border-radius:6px; font-family:var(--head); font-size:.72rem; font-weight:900; letter-spacing:1px; text-transform:uppercase; cursor:pointer; white-space:nowrap; flex-shrink:0; }
 
   /* ── TABS ── */
   .tabs { display:flex; background:var(--panel); border-bottom:1px solid var(--border); }
@@ -253,22 +256,26 @@
   .ws-prog-val   { font-size: .62rem; font-family: var(--mono); color: var(--subtext); }
   .ws-bar-bg { height: 6px; background: #1e2330; border-radius: 3px; overflow: hidden; }
   .ws-bar    { height: 100%; background: linear-gradient(90deg, var(--green), var(--teal)); border-radius: 3px; transition: width .5s; }
-  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:200; display:flex; align-items:flex-start; justify-content:center; padding:20px 12px; overflow-y:auto; }
-  .modal-bg.hidden { display:none; }
-  .modal { background:var(--panel); border:1px solid var(--border); border-radius:14px; width:100%; max-width:480px; padding:20px; }
-  .modal h2 { font-size:1.2rem; font-weight:900; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:4px; }
-  .modal .modal-sub { font-size:.75rem; color:var(--subtext); margin-bottom:16px; line-height:1.5; }
-  .step { background:#1a1f2e; border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:10px; }
-  .step-num { font-size:.6rem; font-weight:700; letter-spacing:2px; color:var(--purple); text-transform:uppercase; margin-bottom:4px; }
-  .step p { font-size:.8rem; color:var(--text); line-height:1.5; }
-  .step a { color:var(--blue); text-decoration:none; }
-  .step code { background:#0d0f12; padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:.75rem; color:var(--amber); }
-  .modal-field { margin-top:14px; }
-  .modal-field label { font-size:.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--subtext); display:block; margin-bottom:5px; }
-  .modal-field input { width:100%; }
-  .modal-btns { display:flex; gap:8px; margin-top:14px; }
-  .btn-modal-ok { flex:1; padding:13px; background:var(--purple); color:#000; font-family:var(--head); font-size:.9rem; font-weight:900; letter-spacing:1px; text-transform:uppercase; border:none; border-radius:8px; cursor:pointer; }
-  .btn-modal-cancel { flex:0 0 auto; padding:13px 16px; background:none; color:var(--subtext); font-family:var(--head); font-size:.9rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; border:1px solid var(--border); border-radius:8px; cursor:pointer; }
+
+  /* ── ABOUT MODAL ── */
+  .about-bg { position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:300; display:flex; align-items:flex-start; justify-content:center; padding:20px 16px 40px; overflow-y:auto; }
+  .about-bg.hidden { display:none; }
+  .about-box { background:var(--panel); border:1px solid var(--border); border-radius:16px; width:100%; max-width:460px; overflow:hidden; }
+  .about-hero { background:linear-gradient(135deg,#1a0f00,#1f1506); padding:28px 20px 22px; text-align:center; border-bottom:1px solid var(--border); }
+  .about-hero .big-pizza { font-size:3.5rem; line-height:1; margin-bottom:10px; }
+  .about-hero h2 { font-size:1.6rem; font-weight:900; letter-spacing:2px; text-transform:uppercase; color:var(--orange); margin-bottom:2px; }
+  .about-hero h2 span { color:var(--amber); }
+  .about-version { font-family:var(--mono); font-size:.7rem; color:var(--muted); margin-top:6px; }
+  .about-credit { font-size:.78rem; color:var(--subtext); margin-top:4px; }
+  .about-credit strong { color:var(--orange); }
+  .about-body { padding:18px 18px 22px; }
+  .about-section-title { font-size:.6rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--orange); border-bottom:1px solid var(--border); padding-bottom:5px; margin:16px 0 10px; }
+  .about-section-title:first-child { margin-top:0; }
+  .guide-item { display:flex; gap:10px; margin-bottom:10px; align-items:flex-start; }
+  .guide-icon { font-size:1.1rem; flex-shrink:0; margin-top:1px; }
+  .guide-text { font-size:.78rem; color:var(--subtext); line-height:1.55; }
+  .guide-text strong { color:var(--text); }
+  .btn-close-about { display:block; width:100%; padding:14px; margin-top:6px; background:var(--orange); color:#000; font-family:var(--head); font-size:.95rem; font-weight:900; letter-spacing:2px; text-transform:uppercase; border:none; border-radius:0 0 16px 16px; cursor:pointer; }
 
   ::-webkit-scrollbar { width:4px; }
   ::-webkit-scrollbar-track { background:var(--bg); }
@@ -278,17 +285,62 @@
 <body>
 
 <div class="app-header">
-  <h1>🍕 Delivery <span>Log</span></h1>
+  <h1><span style="cursor:pointer" onclick="openAbout()" title="About">🍕</span> Delivery <span>Log</span></h1>
   <div class="header-right"><div class="header-meta" id="headerMeta"></div></div>
 </div>
 
+<!-- ══ ABOUT MODAL ══ -->
+<div class="about-bg hidden" id="aboutModal">
+  <div class="about-box">
+    <div class="about-hero">
+      <div class="big-pizza">🍕</div>
+      <h2>Delivery <span>Log</span></h2>
+      <div class="about-credit">Created by <strong>YourPizzaHero</strong></div>
+      <div class="about-version">Version 1.0.0 &nbsp;·&nbsp; Updated April 8, 2026</div>
+    </div>
+    <div class="about-body">
+
+      <div class="about-section-title">📋 Logging a Shift</div>
+      <div class="guide-item"><div class="guide-icon">⏱</div><div class="guide-text"><strong>Shift Timer</strong> — Tap Start Shift when you clock in. It stamps your start time automatically. Tap End Shift when you're done to fill in the end time. Then enter your earnings and hit Save.</div></div>
+      <div class="guide-item"><div class="guide-icon">💰</div><div class="guide-text"><strong>Tips Paid Out</strong> — The card tips the store paid out to you. <strong>Cash Tips</strong> is money handed to you directly by customers. Both are required — they're added together to calculate your total earned and hourly rate.</div></div>
+      <div class="guide-item"><div class="guide-icon">🚗</div><div class="guide-text"><strong>Miles Driven</strong> — Optional. Log it if you want to track distance per shift.</div></div>
+      <div class="guide-item"><div class="guide-icon">☁️</div><div class="guide-text"><strong>Weather &amp; Holiday</strong> — Tap to select conditions for the shift. Over time the Stats tab will show you which weather and days of the week earn the most tips.</div></div>
+
+      <div class="about-section-title">💵 Paychecks</div>
+      <div class="guide-item"><div class="guide-icon">📄</div><div class="guide-text">Log each paycheck with the amount and the date range it covers. The app will match it against shifts you've logged and calculate your <strong>base pay per hour</strong>, then combine it with tips to show your <strong>true total hourly rate</strong> in the Stats tab.</div></div>
+
+      <div class="about-section-title">📊 Stats</div>
+      <div class="guide-item"><div class="guide-icon">🎯</div><div class="guide-text"><strong>Weekly Goal</strong> — Set a target earnings amount and a progress bar will appear in the History tab showing how close you are for the current week.</div></div>
+      <div class="guide-item"><div class="guide-icon">📅</div><div class="guide-text">Work weeks run <strong>Monday through Sunday</strong>. Filter by This Week, This Month, or All Time.</div></div>
+
+      <div class="about-section-title">💾 Saving Your Data</div>
+      <div class="guide-item"><div class="guide-icon">📁</div><div class="guide-text">The first time you save a shift, you'll be asked where to save the file on your phone. Choose a folder (like Downloads) and it will auto-save there every time.</div></div>
+      <div class="guide-item"><div class="guide-icon">🔗</div><div class="guide-text">Each time you reopen the app, tap <strong>Relink</strong> in the blue banner to reconnect your save file. This is a one-tap step and keeps auto-saving active.</div></div>
+      <div class="guide-item"><div class="guide-icon">⬆</div><div class="guide-text">Use the <strong>Import</strong> button in the top bar to restore data from any saved backup of your file.</div></div>
+
+      <div class="about-section-title">🚗 Drivosity Tab</div>
+      <div class="guide-item"><div class="guide-icon">🔑</div><div class="guide-text">Tap <strong>Clock In</strong> or <strong>Clock Out</strong> to open the Drivosity login page. Each tap is logged with a timestamp in the Recent Activity section below so you have your own record.</div></div>
+      <div class="guide-item"><div class="guide-icon">🍕</div><div class="guide-text">The <strong>Delivery Experience</strong> button opens the Domino's driver app listing so you can launch it quickly.</div></div>
+
+    </div>
+    <button class="btn-close-about" onclick="closeAbout()">✕ Close</button>
+  </div>
+</div>
+
 <div class="storage-bar">
-  <span class="bar-label">💾</span>
-  <div class="pill usb-off"   id="usbPill"   onclick="connectUSB()"><span class="dot"></span><span id="usbLabel">Link USB</span></div>
-  <div class="pill drive-off" id="drivePill" onclick="openDriveModal()"><span class="dot"></span><span id="driveLabel">Link Drive</span></div>
-  <div class="pill" style="border-color:var(--muted);color:var(--muted)" onclick="document.getElementById('importFile').click()">⬆ Import</div>
+  <div class="save-status">
+    <span class="save-dot" id="saveDot"></span>
+    <span id="saveLabel">No save file — tap Save Shift to set one up</span>
+  </div>
+  <button class="btn-import" onclick="document.getElementById('importFile').click()">⬆ Import</button>
 </div>
 <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<!-- Relink banner — shown on new session when data exists but handle is gone -->
+<div class="relink-banner hidden" id="relinkBanner">
+  <p><strong>Relink your save file</strong> to keep auto-saving this session.</p>
+  <button class="btn-relink" onclick="relinkFile()">📁 Relink</button>
+</div>
 
 <div class="tabs">
   <button class="tab active" onclick="switchTab('log',this)">＋ Log</button>
@@ -473,63 +525,26 @@
   <div class="portal-stamps" id="portalStamps"></div>
 </div>
 
-<!-- ══ GOOGLE DRIVE MODAL ══ -->
-<div class="modal-bg hidden" id="driveModal">
-  <div class="modal">
-    <h2>🔗 Link Google Drive</h2>
-    <p class="modal-sub">Data saved as <strong style="color:var(--amber)">delivery_data.json</strong> in your Google Drive.</p>
-    <div id="drive-has-id" class="hidden">
-      <p style="font-size:.8rem;color:var(--subtext);margin-bottom:12px">Client ID saved. Tap below to sign in.</p>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-        <input type="text" id="drive-id-display" readonly style="font-size:.7rem;flex:1">
-        <button onclick="clearDriveId()" style="padding:8px 10px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;font-family:var(--head);font-size:.7rem;letter-spacing:1px;text-transform:uppercase">Clear</button>
-      </div>
-      <button class="btn-modal-ok" style="background:var(--purple);width:100%" onclick="signInDrive()">Sign In &amp; Connect</button>
-      <button class="btn-modal-cancel" style="width:100%;margin-top:8px" onclick="closeDriveModal()">Cancel</button>
-    </div>
-    <div id="drive-setup">
-      <p style="font-size:.75rem;color:var(--amber);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">One-Time Setup (≈ 3 min)</p>
-      <div class="step"><div class="step-num">Step 1</div><p>Open <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a>, sign in, tap <strong>New Project</strong> → name it <code>DeliveryTracker</code> → Create.</p></div>
-      <div class="step"><div class="step-num">Step 2</div><p>Go to <strong>APIs &amp; Services → Library</strong>, search <strong>Google Drive API</strong>, tap Enable.</p></div>
-      <div class="step"><div class="step-num">Step 3</div><p>Go to <strong>OAuth consent screen → External → Create</strong>. Fill in app name &amp; your email. Save through all steps.</p></div>
-      <div class="step"><div class="step-num">Step 4</div><p>Go to <strong>Credentials → Create Credentials → OAuth client ID → Web application</strong>. Under Authorized JavaScript origins add <code>null</code>. Tap Create.</p></div>
-      <div class="step"><div class="step-num">Step 5</div><p>Copy the <strong>Client ID</strong> (ends in <code>.apps.googleusercontent.com</code>) and paste below.</p></div>
-      <div class="modal-field"><label>Your Google Client ID</label><input type="text" id="drive-client-id" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off"></div>
-      <div class="modal-btns">
-        <button class="btn-modal-ok" onclick="saveDriveId()">Save &amp; Connect</button>
-        <button class="btn-modal-cancel" onclick="closeDriveModal()">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div id="toast"></div>
 
 <script>
 // ══════════════════════════════════════════
 // CONSTANTS
 // ══════════════════════════════════════════
-const LS     = 'dtlog_v5';        // bumped version key
-const LS_CID = 'dtlog_gcid';
-const LS_FID = 'dtlog_gfid';
-const SCOPE  = 'https://www.googleapis.com/auth/drive.file';
-const FNAME  = 'delivery_data.json';
-const MIME   = 'application/json';
-const USB_OPTS = {types:[{description:'Delivery Data',accept:{'application/json':['.json']}}],suggestedName:FNAME};
+const LS       = 'dtlog_v5';
+const FILE_OPTS = { types:[{ description:'Delivery Data', accept:{'application/json':['.json']} }], suggestedName:'delivery_data.json' };
 
 // ══════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════
 let entries    = [];
 let paychecks  = [];
-let fileHandle = null;
-let driveToken = null;
-let driveFid   = null;
+let fileHandle = null;   // File System Access API handle — lives for this session only
 let weatherSel = null;
 let holidaySel = '';
 let hFilter    = 'all';
 let sFilter    = 'week';
-let editingId  = null;   // null = new entry, number = editing existing
+let editingId  = null;
 
 // ══════════════════════════════════════════
 // DATA MIGRATION
@@ -567,7 +582,6 @@ function migrateAll(raw) {
 // ══════════════════════════════════════════
 (function init() {
   loadFromLS();
-  driveFid = localStorage.getItem(LS_FID) || null;
 
   const today = localDateStr();
   document.getElementById('f-date').value = today;
@@ -575,9 +589,13 @@ function migrateAll(raw) {
   document.getElementById('hol-none').addEventListener('click', clearHoliday);
   document.getElementById('p-end').value = today;
 
+  // Show relink banner if data exists but no file handle yet this session
+  if (entries.length > 0 || paychecks.length > 0) {
+    document.getElementById('relinkBanner').classList.remove('hidden');
+  }
+
   updateDOW(); setNowTime(); tickClock(); setInterval(tickClock, 30000);
 
-  // Load saved weekly goal
   const savedGoal = localStorage.getItem('dtlog_weekgoal');
   if (savedGoal) document.getElementById('weekGoalInput').value = savedGoal;
 
@@ -641,17 +659,75 @@ function updateDOW() {
 }
 
 // ══════════════════════════════════════════
-// PERSIST
+// PERSIST — localStorage + phone file
 // ══════════════════════════════════════════
 async function persist() {
   saveToLS();
-  const out = [];
-  if (fileHandle) { const ok = await writeUSB();        if (ok) out.push('USB');   }
-  if (driveToken && driveFid) { const ok = await writeDriveFile(); if (ok) out.push('Drive'); }
-  if (!fileHandle && !driveToken) {
-    toast('Saved to phone — link USB or Drive for backup', 'warn'); return;
+  if (!fileHandle) {
+    // First save ever this session: ask user where to save
+    if (!('showSaveFilePicker' in window)) return; // browser unsupported, LS only
+    try {
+      fileHandle = await window.showSaveFilePicker(FILE_OPTS);
+      document.getElementById('relinkBanner').classList.add('hidden');
+    } catch(e) {
+      if (e.name === 'AbortError') return; // user cancelled — fine, LS already saved
+      return;
+    }
   }
-  if (out.length) toast('Saved to ' + out.join(' + '), 'ok');
+  await writeFile();
+}
+
+async function writeFile() {
+  if (!fileHandle) return false;
+  try {
+    const w = await fileHandle.createWritable();
+    await w.write(JSON.stringify({ entries, paychecks }, null, 2));
+    await w.close();
+    setSaveStatus(true, fileHandle.name);
+    return true;
+  } catch {
+    setSaveStatus(false);
+    return false;
+  }
+}
+
+function setSaveStatus(linked, name) {
+  const dot   = document.getElementById('saveDot');
+  const label = document.getElementById('saveLabel');
+  if (linked) {
+    dot.classList.add('linked');
+    label.textContent = 'Saving to: ' + (name || 'delivery_data.json');
+  } else {
+    dot.classList.remove('linked');
+    label.textContent = 'No save file — tap Save Shift to set one up';
+  }
+}
+
+async function relinkFile() {
+  // Re-open an existing file to resume auto-saving to it
+  if (!('showOpenFilePicker' in window)) { toast('Not supported in this browser','warn'); return; }
+  try {
+    const [fh] = await window.showOpenFilePicker({ ...FILE_OPTS, multiple: false });
+    fileHandle = fh;
+    const txt = await (await fileHandle.getFile()).text();
+    if (txt.trim()) {
+      try {
+        const raw = JSON.parse(txt);
+        const mig = migrateAll(raw);
+        const fEIds = new Set(mig.entries.map(e => e.id));
+        const fCIds = new Set(mig.paychecks.map(c => c.id));
+        entries   = [...mig.entries,   ...entries.filter(e => !fEIds.has(e.id))].sort((a,b) => b.id-a.id);
+        paychecks = [...mig.paychecks, ...paychecks.filter(c => !fCIds.has(c.id))].sort((a,b) => b.id-a.id);
+        saveToLS();
+        toast('Relinked — ' + entries.length + ' shifts loaded', 'ok');
+      } catch { toast('Could not read file','warn'); }
+    } else {
+      await writeFile(); // empty file — write current data into it
+    }
+    document.getElementById('relinkBanner').classList.add('hidden');
+    setSaveStatus(true, fh.name);
+    renderHistory(); renderPaychecks(); renderStats();
+  } catch(e) { if (e.name !== 'AbortError') toast('Could not open file','err'); }
 }
 
 // ══════════════════════════════════════════
@@ -1226,172 +1302,6 @@ function exportCSV() {
 }
 
 // ══════════════════════════════════════════
-// USB FILE SYSTEM ACCESS
-// ══════════════════════════════════════════
-async function connectUSB() {
-  if (!('showOpenFilePicker' in window)) { toast('Browser does not support direct file access','warn'); return; }
-  try {
-    const [fh] = await window.showOpenFilePicker({ ...USB_OPTS, multiple: false });
-    fileHandle = fh;
-    const txt = await (await fileHandle.getFile()).text();
-    if (txt.trim()) {
-      try {
-        const raw = JSON.parse(txt);
-        const mig = migrateAll(raw);
-        const usbEIds = new Set(mig.entries.map(e => e.id));
-        const usbCIds = new Set(mig.paychecks.map(c => c.id));
-        entries   = [...mig.entries,   ...entries.filter(e => !usbEIds.has(e.id))].sort((a,b) => b.id-a.id);
-        paychecks = [...mig.paychecks, ...paychecks.filter(c => !usbCIds.has(c.id))].sort((a,b) => b.id-a.id);
-        saveToLS();
-        toast('Loaded ' + entries.length + ' shifts from USB', 'ok');
-      } catch { toast('Could not read USB file','warn'); }
-    } else { await writeUSB(); }
-    setUSBStatus(true, fh.name);
-    renderHistory(); renderPaychecks(); renderStats();
-  } catch(e) { if (e.name !== 'AbortError') createNewUSBFile(); }
-}
-async function createNewUSBFile() {
-  try {
-    fileHandle = await window.showSaveFilePicker(USB_OPTS);
-    await writeUSB(); setUSBStatus(true, fileHandle.name); toast('New USB file created','ok');
-  } catch(e) { if (e.name !== 'AbortError') toast('Could not access USB drive','err'); }
-}
-async function writeUSB() {
-  if (!fileHandle) return false;
-  try {
-    const w = await fileHandle.createWritable();
-    await w.write(JSON.stringify({ entries, paychecks }, null, 2));
-    await w.close(); return true;
-  } catch { toast('USB write failed','warn'); return false; }
-}
-function setUSBStatus(on, name) {
-  const p = document.getElementById('usbPill'), l = document.getElementById('usbLabel');
-  p.className = 'pill ' + (on ? 'usb-on' : 'usb-off');
-  l.textContent = on ? (name || 'USB Linked') : 'Link USB';
-}
-
-// ══════════════════════════════════════════
-// GOOGLE DRIVE
-// ══════════════════════════════════════════
-function openDriveModal() {
-  const cid = localStorage.getItem(LS_CID) || '';
-  if (cid) {
-    document.getElementById('drive-id-display').value = cid;
-    document.getElementById('drive-has-id').classList.remove('hidden');
-    document.getElementById('drive-setup').classList.add('hidden');
-  } else {
-    document.getElementById('drive-has-id').classList.add('hidden');
-    document.getElementById('drive-setup').classList.remove('hidden');
-    document.getElementById('drive-client-id').value = '';
-  }
-  document.getElementById('driveModal').classList.remove('hidden');
-}
-function closeDriveModal() { document.getElementById('driveModal').classList.add('hidden'); }
-function saveDriveId() {
-  const cid = document.getElementById('drive-client-id').value.trim();
-  if (!cid || !cid.includes('.apps.googleusercontent.com')) { toast('Paste a valid Client ID','err'); return; }
-  localStorage.setItem(LS_CID, cid); closeDriveModal(); signInDrive();
-}
-function clearDriveId() {
-  if (!confirm('Remove saved Client ID and disconnect Google Drive?')) return;
-  localStorage.removeItem(LS_CID); localStorage.removeItem(LS_FID);
-  driveToken = null; driveFid = null; setDriveStatus(false); closeDriveModal();
-}
-function loadGIS() {
-  return new Promise((res,rej) => {
-    if (window.google && window.google.accounts) { res(); return; }
-    const s = document.createElement('script');
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.onload = res; s.onerror = () => rej(new Error('Failed to load GIS'));
-    document.head.appendChild(s);
-  });
-}
-async function signInDrive() {
-  closeDriveModal();
-  const cid = localStorage.getItem(LS_CID);
-  if (!cid) { toast('No Client ID saved','warn'); return; }
-  toast('Opening Google sign-in…','info');
-  try {
-    await loadGIS();
-    const tc = google.accounts.oauth2.initTokenClient({
-      client_id: cid, scope: SCOPE,
-      callback: async resp => {
-        if (resp.error) { toast('Sign-in failed: ' + resp.error,'err'); return; }
-        driveToken = resp.access_token;
-        toast('Signed in! Syncing…','info');
-        await syncDrive();
-      }
-    });
-    tc.requestAccessToken({ prompt:'consent' });
-  } catch { toast('Could not load Google sign-in','err'); }
-}
-async function syncDrive() {
-  try {
-    let fid = driveFid || await findDriveFile();
-    if (fid) {
-      driveFid = fid; localStorage.setItem(LS_FID, fid);
-      const remote = await readDriveFile(fid);
-      if (remote) {
-        const mig = migrateAll(remote);
-        const rEIds = new Set(mig.entries.map(e => e.id));
-        const rCIds = new Set(mig.paychecks.map(c => c.id));
-        entries   = [...mig.entries,   ...entries.filter(e => !rEIds.has(e.id))].sort((a,b) => b.id-a.id);
-        paychecks = [...mig.paychecks, ...paychecks.filter(c => !rCIds.has(c.id))].sort((a,b) => b.id-a.id);
-        saveToLS(); toast('Loaded from Drive','ok');
-      } else { await writeDriveFile(); toast('Drive connected','ok'); }
-    } else {
-      fid = await createDriveFile(); driveFid = fid; localStorage.setItem(LS_FID, fid);
-      toast('New Drive file created','ok');
-    }
-    setDriveStatus(true); renderHistory(); renderPaychecks(); renderStats();
-  } catch(e) { toast('Drive sync failed: ' + e.message,'err'); }
-}
-async function findDriveFile() {
-  const q = encodeURIComponent(`name='${FNAME}' and mimeType='${MIME}' and trashed=false`);
-  const r = await gFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
-  return r.files && r.files.length ? r.files[0].id : null;
-}
-async function readDriveFile(fid) {
-  const r = await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media`, { headers:{Authorization:'Bearer '+driveToken} });
-  if (!r.ok) throw new Error('Read failed: ' + r.status);
-  const txt = await r.text();
-  if (!txt.trim()) return null;
-  return JSON.parse(txt);
-}
-async function createDriveFile() {
-  const meta = JSON.stringify({name:FNAME,mimeType:MIME});
-  const body = JSON.stringify({entries,paychecks},null,2);
-  const bnd  = 'dlv_bnd';
-  const mp   = `--${bnd}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${bnd}\r\nContent-Type: ${MIME}\r\n\r\n${body}\r\n--${bnd}--`;
-  const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
-    method:'POST', headers:{Authorization:'Bearer '+driveToken,'Content-Type':`multipart/related; boundary=${bnd}`}, body:mp
-  });
-  if (!r.ok) throw new Error('Create failed: ' + r.status);
-  return (await r.json()).id;
-}
-async function writeDriveFile() {
-  if (!driveFid || !driveToken) return false;
-  try {
-    const r = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFid}?uploadType=media`, {
-      method:'PATCH', headers:{Authorization:'Bearer '+driveToken,'Content-Type':MIME},
-      body: JSON.stringify({entries,paychecks},null,2)
-    });
-    if (!r.ok) throw new Error('Write failed ' + r.status);
-    return true;
-  } catch(e) { toast('Drive write failed: ' + e.message,'warn'); return false; }
-}
-async function gFetch(url) {
-  const r = await fetch(url, { headers:{Authorization:'Bearer '+driveToken} });
-  if (!r.ok) throw new Error('Drive API ' + r.status);
-  return r.json();
-}
-function setDriveStatus(on) {
-  const p = document.getElementById('drivePill'), l = document.getElementById('driveLabel');
-  p.className = 'pill ' + (on ? 'drive-on' : 'drive-off');
-  l.textContent = on ? 'Drive Linked' : 'Link Drive';
-}
-
-// ══════════════════════════════════════════
 // MANUAL JSON IMPORT
 // Lets users load a backup delivery_data.json
 // from anywhere — phone Files app, email, etc.
@@ -1465,24 +1375,15 @@ function renderStamps() {
     (portalStamps.length > 10 ? `<p style="font-size:.65rem;color:var(--muted);text-align:center;padding:8px 0">${portalStamps.length - 10} older entries hidden</p>` : '');
 }
 
-function launchDeliveryApp() {
-  // Proper Android launcher intent — no fallback URL so Chrome doesn't
-  // second-guess itself and redirect to the Play Store prematurely.
-  // The action + category combo targets the app's main launch activity.
-  window.location.href =
-    'intent://#Intent;' +
-    'action=android.intent.action.MAIN;' +
-    'category=android.intent.category.LAUNCHER;' +
-    'package=com.dominos.driver.app;' +
-    'end';
-}
-
 function saveWeekGoal(val) {
   const n = parseFloat(val);
   if (n > 0) localStorage.setItem('dtlog_weekgoal', n);
   else localStorage.removeItem('dtlog_weekgoal');
   renderWeeklySummary();
 }
+
+function openAbout()  { document.getElementById('aboutModal').classList.remove('hidden'); }
+function closeAbout() { document.getElementById('aboutModal').classList.add('hidden'); }
 
 // ══════════════════════════════════════════
 // HELPERS
