@@ -330,7 +330,7 @@
 <div class="storage-bar">
   <div class="save-status">
     <span class="save-dot" id="saveDot"></span>
-    <span id="saveLabel">No save file — tap Save Shift to set one up</span>
+    <span id="saveLabel">No save file linked</span>
   </div>
   <button class="btn-import" onclick="document.getElementById('importFile').click()">⬆ Import</button>
 </div>
@@ -664,13 +664,21 @@ function updateDOW() {
 async function persist() {
   saveToLS();
   if (!fileHandle) {
-    // First save ever this session: ask user where to save
-    if (!('showSaveFilePicker' in window)) return; // browser unsupported, LS only
+    if (!('showSaveFilePicker' in window)) return;
     try {
-      fileHandle = await window.showSaveFilePicker(FILE_OPTS);
+      const hasFile = localStorage.getItem('dtlog_hasFile');
+      if (hasFile) {
+        // Returning user — open their existing file to overwrite it
+        const [fh] = await window.showOpenFilePicker({ ...FILE_OPTS, multiple: false });
+        fileHandle = fh;
+      } else {
+        // Brand new user — create a new file
+        fileHandle = await window.showSaveFilePicker(FILE_OPTS);
+        localStorage.setItem('dtlog_hasFile', '1');
+      }
       document.getElementById('relinkBanner').classList.add('hidden');
     } catch(e) {
-      if (e.name === 'AbortError') return; // user cancelled — fine, LS already saved
+      if (e.name === 'AbortError') return;
       return;
     }
   }
@@ -704,7 +712,6 @@ function setSaveStatus(linked, name) {
 }
 
 async function relinkFile() {
-  // Re-open an existing file to resume auto-saving to it
   if (!('showOpenFilePicker' in window)) { toast('Not supported in this browser','warn'); return; }
   try {
     const [fh] = await window.showOpenFilePicker({ ...FILE_OPTS, multiple: false });
@@ -714,16 +721,18 @@ async function relinkFile() {
       try {
         const raw = JSON.parse(txt);
         const mig = migrateAll(raw);
-        const fEIds = new Set(mig.entries.map(e => e.id));
-        const fCIds = new Set(mig.paychecks.map(c => c.id));
-        entries   = [...mig.entries,   ...entries.filter(e => !fEIds.has(e.id))].sort((a,b) => b.id-a.id);
-        paychecks = [...mig.paychecks, ...paychecks.filter(c => !fCIds.has(c.id))].sort((a,b) => b.id-a.id);
+        // Replace entirely — file is the source of truth when relinking.
+        // Do NOT merge; LS and file hold the same data so merging doubles everything.
+        entries   = mig.entries;
+        paychecks = mig.paychecks;
         saveToLS();
         toast('Relinked — ' + entries.length + ' shifts loaded', 'ok');
       } catch { toast('Could not read file','warn'); }
     } else {
-      await writeFile(); // empty file — write current data into it
+      // File is empty — write current data into it
+      await writeFile();
     }
+    localStorage.setItem('dtlog_hasFile', '1');
     document.getElementById('relinkBanner').classList.add('hidden');
     setSaveStatus(true, fh.name);
     renderHistory(); renderPaychecks(); renderStats();
