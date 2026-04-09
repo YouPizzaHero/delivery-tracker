@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#f97316">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Delivery Log">
+<meta name="description" content="Track your delivery shifts, tips, mileage and pay.">
+<title>Delivery Tracker</title>
+<link rel="manifest" id="pwa-manifest">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&display=swap');
+
+  :root {
+    --bg:     #0d0f12; --panel:  #151820; --border: #252a35;
+    --orange: #f97316; --amber:  #fbbf24; --green:  #22c55e;
+    --red:    #ef4444; --blue:   #60a5fa; --purple: #a78bfa;
+    --teal:   #2dd4bf; --muted:  #4b5563; --text:   #e2e8f0;
+    --subtext:#94a3b8;
+    --mono: 'Share Tech Mono', monospace;
+    --head: 'Barlow Condensed', sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--head); font-size:16px; min-height:100vh; padding-bottom:80px; }
+
+  /* ── HEADER ── */
+  .app-header { background:linear-gradient(135deg,#0d0f12,#1a1f2e); border-bottom:2px solid var(--orange); padding:12px 16px 10px; position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; }
+  .app-header h1 { font-size:1.6rem; font-weight:900; letter-spacing:2px; text-transform:uppercase; color:var(--orange); text-shadow:0 0 20px rgba(249,115,22,.4); line-height:1; }
+  .app-header h1 span { color:var(--amber); }
+  .header-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+  .header-meta { font-family:var(--mono); font-size:.68rem; color:var(--subtext); }
+
+  /* ── STORAGE BAR ── */
+  .storage-bar { background:#0f1218; border-bottom:1px solid var(--border); padding:8px 12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .bar-label { font-size:.6rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); flex-shrink:0; }
+  .pill { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border-radius:20px; cursor:pointer; font-size:.68rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; font-family:var(--head); border:1px solid; transition:all .2s; flex-shrink:0; }
+  .pill .dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+  .pill.usb-off   { border-color:var(--muted); color:var(--muted); }
+  .pill.usb-on    { border-color:var(--green); color:var(--green); background:rgba(34,197,94,.1); }
+  .pill.drive-off { border-color:var(--muted); color:var(--muted); }
+  .pill.drive-on  { border-color:var(--purple); color:var(--purple); background:rgba(167,139,250,.1); }
+
+  /* ── TABS ── */
+  .tabs { display:flex; background:var(--panel); border-bottom:1px solid var(--border); }
+  .tab  { flex:1; padding:11px 2px; text-align:center; font-size:.78rem; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--subtext); cursor:pointer; border:none; background:none; border-bottom:3px solid transparent; transition:all .2s; }
+  .tab.active { color:var(--orange); border-bottom-color:var(--orange); }
+
+  /* ── PANELS ── */
+  .panel { display:none; padding:16px; }
+  .panel.active { display:block; }
+
+  /* ── EDIT BANNER ── */
+  .edit-banner { background:rgba(251,191,36,.1); border:1px solid var(--amber); border-radius:8px; padding:10px 14px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .edit-banner p { font-size:.8rem; color:var(--amber); font-weight:700; letter-spacing:.5px; }
+  .btn-cancel-edit { padding:6px 14px; background:none; border:1px solid var(--amber); color:var(--amber); border-radius:6px; cursor:pointer; font-family:var(--head); font-size:.75rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+  .hidden { display:none !important; }
+
+  /* ── FORM ── */
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .form-grid .full { grid-column:1/-1; }
+  .field { display:flex; flex-direction:column; gap:4px; }
+  .field label { font-size:.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--subtext); }
+  .field label .req { color:var(--orange); }
+  .field label .opt { color:var(--muted); font-weight:400; }
+  input,select,textarea { background:#1e2330; border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:var(--mono); font-size:.9rem; padding:10px 12px; width:100%; transition:border-color .2s; -webkit-appearance:none; }
+  input:focus,select:focus,textarea:focus { outline:none; border-color:var(--orange); box-shadow:0 0 0 2px rgba(249,115,22,.15); }
+  select option { background:#1e2330; }
+  textarea { resize:vertical; min-height:60px; }
+
+  .toggle-group { display:flex; gap:6px; flex-wrap:wrap; }
+  .tog { padding:7px 12px; border-radius:20px; border:1px solid var(--border); background:#1e2330; color:var(--subtext); font-size:.75rem; font-weight:700; letter-spacing:1px; cursor:pointer; transition:all .15s; font-family:var(--head); }
+  .tog.active     { background:var(--orange); border-color:var(--orange); color:#000; }
+  .tog.hol.active { background:var(--amber);  border-color:var(--amber);  color:#000; }
+
+  /* ── BUTTONS ── */
+  .btn-submit { width:100%; padding:16px; margin-top:16px; background:var(--orange); color:#000; font-family:var(--head); font-size:1rem; font-weight:900; letter-spacing:2px; text-transform:uppercase; border:none; border-radius:8px; cursor:pointer; transition:background .2s,transform .1s; box-shadow:0 4px 20px rgba(249,115,22,.3); }
+  .btn-submit:active { transform:scale(.98); background:#ea6c00; }
+  .btn-submit.edit-mode { background:var(--amber); box-shadow:0 4px 20px rgba(251,191,36,.3); }
+  .btn-submit.teal-btn  { background:var(--teal);  box-shadow:0 4px 20px rgba(45,212,191,.25); }
+  .btn-submit.teal-btn:active { background:#14b8a6; }
+
+  .section-label { font-size:.65rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--orange); border-bottom:1px solid var(--border); padding-bottom:6px; margin:18px 0 10px; grid-column:1/-1; }
+
+  /* ── STAT CARDS ── */
+  .stats-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+  .stat-card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px 12px; display:flex; flex-direction:column; gap:2px; }
+  .stat-card .s-label { font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--subtext); }
+  .stat-card .s-val   { font-family:var(--mono); font-size:1.4rem; color:var(--amber); font-weight:bold; }
+  .stat-card .s-sub   { font-size:.7rem; color:var(--muted); font-family:var(--mono); }
+
+  /* ── HOURLY BREAKDOWN CARD ── */
+  .hourly-card { background:var(--panel); border:1px solid var(--teal); border-radius:12px; padding:16px; margin-bottom:12px; }
+  .hourly-card .hc-title { font-size:.65rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:12px; }
+  .hourly-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .hourly-row.divider { border-top:1px solid var(--border); padding-top:8px; margin-bottom:0; }
+  .hr-label { font-size:.8rem; color:var(--subtext); }
+  .hr-val   { font-family:var(--mono); font-size:1.1rem; font-weight:bold; }
+  .hr-val.tips-color  { color:var(--green); }
+  .hr-val.base-color  { color:var(--blue); }
+  .hr-val.total-color { color:var(--teal); font-size:1.3rem; }
+  .hr-note { font-size:.68rem; color:var(--muted); font-family:var(--mono); }
+
+  /* ── FILTER BAR ── */
+  .filter-bar { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+  .filter-btn { padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:var(--panel); color:var(--subtext); font-size:.72rem; font-weight:700; letter-spacing:1px; cursor:pointer; font-family:var(--head); text-transform:uppercase; transition:all .15s; }
+  .filter-btn.active { background:var(--orange); border-color:var(--orange); color:#000; }
+
+  /* ── LOG ENTRIES ── */
+  .log-entry { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:13px; margin-bottom:10px; }
+  .log-entry.holiday-entry { border-left:3px solid var(--amber); }
+  /* Header row: date left, actions right */
+  .log-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+  .log-date-line { display:flex; flex-direction:column; gap:1px; }
+  .log-date { font-weight:700; font-size:1rem; letter-spacing:.5px; }
+  .log-day  { font-size:.7rem; color:var(--subtext); font-family:var(--mono); }
+  /* Badges sit below header */
+  .log-badge { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:4px; }
+  .badge { font-size:.6rem; font-weight:700; letter-spacing:1px; padding:2px 7px; border-radius:10px; text-transform:uppercase; }
+  .badge-h { background:rgba(251,191,36,.2); color:var(--amber); border:1px solid var(--amber); }
+  .badge-w { background:rgba(99,179,237,.15); color:#63b3ed; border:1px solid #63b3ed; }
+  .log-numbers { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:8px; }
+  .log-num { display:flex; flex-direction:column; gap:1px; }
+  .log-num .n-label { font-size:.6rem; letter-spacing:1px; color:var(--muted); text-transform:uppercase; }
+  .log-num .n-val   { font-family:var(--mono); font-size:1rem; }
+  .n-total { color:var(--green); }
+  .n-paid  { color:#86efac; }
+  .n-cash  { color:var(--amber); }
+  .n-miles { color:#fcd34d; }
+  .n-hours { color:var(--blue); }
+  .log-notes { font-size:.75rem; color:var(--subtext); margin-top:5px; font-style:italic; }
+
+  /* entry action buttons — inline top-right, never overlap content */
+  .entry-actions { display:flex; gap:5px; flex-shrink:0; margin-left:8px; }
+  .btn-act { background:none; border:1px solid var(--border); color:var(--muted); font-size:.62rem; padding:4px 10px; border-radius:4px; cursor:pointer; font-family:var(--head); letter-spacing:1px; text-transform:uppercase; transition:all .15s; white-space:nowrap; }
+  .btn-act.edit:active  { border-color:var(--amber); color:var(--amber); }
+  .btn-act.del:active   { border-color:var(--red);   color:var(--red);   }
+
+  /* ── PAYCHECK ENTRIES ── */
+  .check-entry { background:var(--panel); border:1px solid var(--teal); border-radius:10px; padding:13px; margin-bottom:10px; position:relative; }
+  .check-amount { font-family:var(--mono); font-size:1.5rem; color:var(--teal); font-weight:bold; }
+  .check-range  { font-size:.75rem; color:var(--subtext); font-family:var(--mono); margin-top:2px; }
+  .check-note   { font-size:.75rem; color:var(--subtext); margin-top:5px; font-style:italic; }
+  .check-meta   { display:flex; gap:10px; margin-top:8px; flex-wrap:wrap; }
+  .check-meta-item { display:flex; flex-direction:column; gap:1px; }
+  .cm-label { font-size:.58rem; letter-spacing:1px; color:var(--muted); text-transform:uppercase; }
+  .cm-val   { font-family:var(--mono); font-size:.88rem; color:var(--text); }
+
+  .empty { text-align:center; padding:40px 20px; color:var(--muted); }
+  .empty .e-icon { font-size:2.5rem; margin-bottom:10px; }
+  .empty p { font-size:.85rem; letter-spacing:1px; }
+
+  /* ── TOAST ── */
+  #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); padding:10px 24px; border-radius:20px; font-weight:700; font-size:.85rem; letter-spacing:1px; opacity:0; pointer-events:none; transition:opacity .3s; z-index:999; white-space:nowrap; color:#000; }
+  #toast.show      { opacity:1; }
+  #toast.show.ok   { background:var(--green); }
+  #toast.show.warn { background:var(--amber); }
+  #toast.show.err  { background:var(--red); color:#fff; }
+  #toast.show.info { background:var(--purple); }
+
+  /* ── CHARTS ── */
+  .chart-wrap { margin-top:4px; }
+  .chart-row  { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+  .chart-label { font-size:.65rem; font-family:var(--mono); color:var(--subtext); width:28px; text-align:right; flex-shrink:0; }
+  .chart-bar-bg { flex:1; height:20px; background:#1e2330; border-radius:4px; overflow:hidden; }
+  .chart-bar { height:100%; background:linear-gradient(90deg,var(--orange),var(--amber)); border-radius:4px; min-width:2px; display:flex; align-items:center; padding-left:6px; transition:width .4s; }
+  .chart-bar span { font-size:.62rem; font-family:var(--mono); color:#000; font-weight:bold; white-space:nowrap; }
+
+  .btn-secondary { width:100%; padding:12px; margin-top:10px; background:var(--panel); font-family:var(--head); font-size:.85rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; border-radius:8px; cursor:pointer; transition:all .2s; }
+  .btn-csv { color:var(--blue); border:1px solid var(--blue); }
+
+  /* ── PORTAL PANEL ── */
+  .portal-card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:28px 20px; text-align:center; margin-bottom:14px; }
+  .portal-logo { font-size:3rem; margin-bottom:10px; line-height:1; }
+  .portal-name { font-size:1.4rem; font-weight:900; letter-spacing:2px; text-transform:uppercase; color:var(--text); margin-bottom:4px; }
+  .portal-url  { font-family:var(--mono); font-size:.7rem; color:var(--muted); margin-bottom:24px; }
+  .btn-portal {
+    display:block; width:100%; padding:18px;
+    background:var(--orange); color:#000;
+    font-family:var(--head); font-size:1.1rem; font-weight:900;
+    letter-spacing:2px; text-transform:uppercase;
+    border:none; border-radius:10px; cursor:pointer;
+    text-decoration:none; transition:background .2s,transform .1s;
+    box-shadow:0 4px 24px rgba(249,115,22,.35); margin-bottom:12px;
+  }
+  .btn-portal:active { transform:scale(.98); background:#ea6c00; }
+  .btn-portal.out { background:var(--red); box-shadow:0 4px 24px rgba(239,68,68,.3); }
+  .btn-portal.out:active { background:#dc2626; }
+  .portal-hint { font-size:.72rem; color:var(--muted); font-family:var(--mono); line-height:1.5; }
+  .portal-stamps { background:#0f1218; border:1px solid var(--border); border-radius:10px; padding:14px; margin-top:14px; }
+  .ps-title { font-size:.6rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--subtext); margin-bottom:10px; }
+  .ps-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); }
+  .ps-row:last-child { border-bottom:none; }
+  .ps-label { font-size:.72rem; color:var(--subtext); }
+  .ps-val   { font-family:var(--mono); font-size:.82rem; color:var(--text); }
+
+  /* ── SHIFT TIMER ── */
+  .timer-block {
+    background: #0f1218; border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .timer-block.running { border-color: var(--green); background: rgba(34,197,94,.05); }
+  .timer-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .timer-label { font-size: .6rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--subtext); }
+  .timer-display {
+    font-family: var(--mono); font-size: 2rem; font-weight: bold;
+    color: var(--text); letter-spacing: 4px; text-align: center;
+    padding: 4px 0;
+  }
+  .timer-display.running { color: var(--green); text-shadow: 0 0 16px rgba(34,197,94,.4); }
+  .timer-btns { display: flex; gap: 8px; }
+  .btn-timer-start {
+    flex: 1; padding: 12px; border: none; border-radius: 8px;
+    background: var(--green); color: #000;
+    font-family: var(--head); font-size: .9rem; font-weight: 900;
+    letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer;
+    transition: background .2s, transform .1s;
+  }
+  .btn-timer-start:active { transform: scale(.98); }
+  .btn-timer-end {
+    flex: 1; padding: 12px; border: none; border-radius: 8px;
+    background: var(--orange); color: #000;
+    font-family: var(--head); font-size: .9rem; font-weight: 900;
+    letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer;
+    transition: background .2s, transform .1s;
+  }
+  .btn-timer-end:active { transform: scale(.98); }
+  .btn-timer-cancel {
+    padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px;
+    background: none; color: var(--muted);
+    font-family: var(--head); font-size: .9rem; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+  }
+
+  /* ── WEEKLY SUMMARY BANNER ── */
+  .week-summary {
+    background: linear-gradient(135deg, #0f1a14, #0d1520);
+    border: 1px solid var(--border); border-left: 3px solid var(--green);
+    border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;
+  }
+  .ws-title { font-size: .6rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 10px; }
+  .ws-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+  .ws-item { display: flex; flex-direction: column; gap: 2px; }
+  .ws-label { font-size: .58rem; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+  .ws-val   { font-family: var(--mono); font-size: .95rem; font-weight: bold; color: var(--text); }
+  .ws-val.money { color: var(--green); }
+  .ws-progress { margin-top: 8px; }
+  .ws-prog-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .ws-prog-label { font-size: .62rem; color: var(--subtext); }
+  .ws-prog-val   { font-size: .62rem; font-family: var(--mono); color: var(--subtext); }
+  .ws-bar-bg { height: 6px; background: #1e2330; border-radius: 3px; overflow: hidden; }
+  .ws-bar    { height: 100%; background: linear-gradient(90deg, var(--green), var(--teal)); border-radius: 3px; transition: width .5s; }
+  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:200; display:flex; align-items:flex-start; justify-content:center; padding:20px 12px; overflow-y:auto; }
+  .modal-bg.hidden { display:none; }
+  .modal { background:var(--panel); border:1px solid var(--border); border-radius:14px; width:100%; max-width:480px; padding:20px; }
+  .modal h2 { font-size:1.2rem; font-weight:900; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:4px; }
+  .modal .modal-sub { font-size:.75rem; color:var(--subtext); margin-bottom:16px; line-height:1.5; }
+  .step { background:#1a1f2e; border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:10px; }
+  .step-num { font-size:.6rem; font-weight:700; letter-spacing:2px; color:var(--purple); text-transform:uppercase; margin-bottom:4px; }
+  .step p { font-size:.8rem; color:var(--text); line-height:1.5; }
+  .step a { color:var(--blue); text-decoration:none; }
+  .step code { background:#0d0f12; padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:.75rem; color:var(--amber); }
+  .modal-field { margin-top:14px; }
+  .modal-field label { font-size:.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--subtext); display:block; margin-bottom:5px; }
+  .modal-field input { width:100%; }
+  .modal-btns { display:flex; gap:8px; margin-top:14px; }
+  .btn-modal-ok { flex:1; padding:13px; background:var(--purple); color:#000; font-family:var(--head); font-size:.9rem; font-weight:900; letter-spacing:1px; text-transform:uppercase; border:none; border-radius:8px; cursor:pointer; }
+  .btn-modal-cancel { flex:0 0 auto; padding:13px 16px; background:none; color:var(--subtext); font-family:var(--head); font-size:.9rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; border:1px solid var(--border); border-radius:8px; cursor:pointer; }
+
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>🍕 Delivery <span>Log</span></h1>
+  <div class="header-right"><div class="header-meta" id="headerMeta"></div></div>
+</div>
+
+<div class="storage-bar">
+  <span class="bar-label">💾</span>
+  <div class="pill usb-off"   id="usbPill"   onclick="connectUSB()"><span class="dot"></span><span id="usbLabel">Link USB</span></div>
+  <div class="pill drive-off" id="drivePill" onclick="openDriveModal()"><span class="dot"></span><span id="driveLabel">Link Drive</span></div>
+  <div class="pill" style="border-color:var(--muted);color:var(--muted)" onclick="document.getElementById('importFile').click()">⬆ Import</div>
+</div>
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('log',this)">＋ Log</button>
+  <button class="tab" onclick="switchTab('history',this)">History</button>
+  <button class="tab" onclick="switchTab('pay',this)">💵 Pay</button>
+  <button class="tab" onclick="switchTab('stats',this)">Stats</button>
+  <button class="tab" onclick="switchTab('portal',this)">🚗 Drivosity</button>
+</div>
+
+<!-- ══ LOG / EDIT PANEL ══ -->
+<div class="panel active" id="panel-log">
+
+  <!-- Edit mode banner -->
+  <div class="edit-banner hidden" id="editBanner">
+    <p>✏️ Editing shift — make changes and tap Update</p>
+    <button class="btn-cancel-edit" onclick="cancelEdit()">✕ Cancel</button>
+  </div>
+
+  <!-- Shift Timer -->
+  <div class="timer-block" id="timerBlock">
+    <div class="timer-row">
+      <span class="timer-label">⏱ Shift Timer</span>
+      <span class="timer-label" id="timerStatus">Not started</span>
+    </div>
+    <div class="timer-display" id="timerDisplay">00:00:00</div>
+    <div class="timer-btns" id="timerBtnsIdle">
+      <button class="btn-timer-start" onclick="timerStart()">▶ Start Shift</button>
+    </div>
+    <div class="timer-btns hidden" id="timerBtnsRunning">
+      <button class="btn-timer-end" onclick="timerEnd()">■ End Shift</button>
+      <button class="btn-timer-cancel" onclick="timerCancel()">✕</button>
+    </div>
+  </div>
+
+  <div class="form-grid">
+    <div class="section-label">📅 Shift Info</div>
+    <div class="field full"><label>Date <span class="req">*</span></label><input type="date" id="f-date"></div>
+    <div class="field full"><label>Day of Week</label><input type="text" id="f-dow" readonly style="color:var(--amber)"></div>
+    <div class="field"><label>Start Time <span class="req">*</span></label><input type="time" id="f-start"></div>
+    <div class="field"><label>End Time <span class="req">*</span></label><input type="time" id="f-end"></div>
+
+    <div class="section-label">💰 Earnings</div>
+    <div class="field">
+      <label>Tips Paid Out ($) <span class="req">*</span></label>
+      <input type="number" id="f-tips" step="0.01" min="0" placeholder="0.00">
+    </div>
+    <div class="field">
+      <label>Cash Tips ($) <span class="req">*</span></label>
+      <input type="number" id="f-cash" step="0.01" min="0" placeholder="0.00">
+    </div>
+    <div class="field">
+      <label>Miles Driven <span class="opt">(optional)</span></label>
+      <input type="number" id="f-miles" step="0.1" min="0" placeholder="0.0">
+    </div>
+    <div class="field">
+      <label>Number of Deliveries</label>
+      <input type="number" id="f-runs" step="1" min="0" placeholder="0">
+    </div>
+
+    <div class="section-label">☁️ Conditions</div>
+    <div class="field full">
+      <label>Weather</label>
+      <div class="toggle-group" id="weather-group">
+        <button class="tog" data-val="Clear"  onclick="togW(this)">☀️ Clear</button>
+        <button class="tog" data-val="Cloudy" onclick="togW(this)">🌥️ Cloudy</button>
+        <button class="tog" data-val="Rainy"  onclick="togW(this)">🌧️ Rainy</button>
+        <button class="tog" data-val="Stormy" onclick="togW(this)">⛈️ Stormy</button>
+        <button class="tog" data-val="Snowy"  onclick="togW(this)">❄️ Snowy</button>
+        <button class="tog" data-val="Icy"    onclick="togW(this)">🧊 Icy</button>
+        <button class="tog" data-val="Foggy"  onclick="togW(this)">🌫️ Foggy</button>
+        <button class="tog" data-val="Hot"    onclick="togW(this)">🥵 Hot</button>
+      </div>
+    </div>
+    <div class="field full">
+      <label>Holiday?</label>
+      <div class="toggle-group" id="holiday-group">
+        <button class="tog hol active" id="hol-none" data-val="">None</button>
+        <button class="tog hol" data-val="New Year's"     onclick="togH(this)">🎆 New Year's</button>
+        <button class="tog hol" data-val="Super Bowl"     onclick="togH(this)">🏈 Super Bowl</button>
+        <button class="tog hol" data-val="Valentine's"    onclick="togH(this)">💝 Valentine's</button>
+        <button class="tog hol" data-val="St. Patrick's"  onclick="togH(this)">🍀 St. Patrick's</button>
+        <button class="tog hol" data-val="Easter"         onclick="togH(this)">🐣 Easter</button>
+        <button class="tog hol" data-val="4th of July"    onclick="togH(this)">🎇 4th July</button>
+        <button class="tog hol" data-val="Halloween"      onclick="togH(this)">🎃 Halloween</button>
+        <button class="tog hol" data-val="Thanksgiving"   onclick="togH(this)">🦃 Thanksgiving</button>
+        <button class="tog hol" data-val="Christmas Eve"  onclick="togH(this)">🎄 Xmas Eve</button>
+        <button class="tog hol" data-val="Christmas"      onclick="togH(this)">🎁 Christmas</button>
+        <button class="tog hol" data-val="New Year's Eve" onclick="togH(this)">🥂 NYE</button>
+        <button class="tog hol" data-val="Other"          onclick="togH(this)">📅 Other</button>
+      </div>
+    </div>
+    <div class="field full"><label>Event / Notes</label><textarea id="f-notes" placeholder="Game night, concert, slow shift, road work, etc."></textarea></div>
+  </div>
+  <button class="btn-submit" id="submitBtn" onclick="saveEntry()">▶ SAVE SHIFT</button>
+</div>
+
+<!-- ══ HISTORY PANEL ══ -->
+<div class="panel" id="panel-history">
+  <!-- Weekly summary banner -->
+  <div class="week-summary" id="weekSummary"></div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="setHF('all',this)">All</button>
+    <button class="filter-btn" onclick="setHF('week',this)">This Week</button>
+    <button class="filter-btn" onclick="setHF('month',this)">This Month</button>
+    <button class="filter-btn" onclick="setHF('holidays',this)">Holidays</button>
+  </div>
+  <div id="log-list"></div>
+  <button class="btn-secondary btn-csv" onclick="exportCSV()">⬇ Export CSV</button>
+</div>
+
+<!-- ══ PAY PANEL ══ -->
+<div class="panel" id="panel-pay">
+  <div class="form-grid">
+    <div class="section-label">➕ Log a Paycheck</div>
+    <div class="field full"><label>Check Amount ($) <span class="req">*</span></label><input type="number" id="p-amount" step="0.01" min="0" placeholder="0.00"></div>
+    <div class="field"><label>Period Start <span class="req">*</span></label><input type="date" id="p-start"></div>
+    <div class="field"><label>Period End <span class="req">*</span></label><input type="date" id="p-end"></div>
+    <div class="field full"><label>Note <span class="opt">(optional)</span></label><input type="text" id="p-note" placeholder="e.g. biweekly, holiday pay…"></div>
+  </div>
+  <button class="btn-submit teal-btn" onclick="savePaycheck()">▶ SAVE PAYCHECK</button>
+  <div class="section-label" style="margin-top:24px">📋 Paycheck History</div>
+  <div id="check-list"></div>
+</div>
+
+<!-- ══ STATS PANEL ══ -->
+<div class="panel" id="panel-stats">
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="setSF('week',this)">This Week</button>
+    <button class="filter-btn" onclick="setSF('month',this)">This Month</button>
+    <button class="filter-btn" onclick="setSF('all',this)">All Time</button>
+  </div>
+  <!-- Weekly goal setter -->
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+      <label style="font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--subtext)">Weekly Earnings Goal ($)</label>
+      <input type="number" id="weekGoalInput" step="1" min="0" placeholder="e.g. 400" style="font-family:var(--mono)"
+        value="" oninput="saveWeekGoal(this.value)">
+    </div>
+  </div>
+  <div class="hourly-card" id="hourly-card"></div>
+  <div class="stats-row" id="stat-cards"></div>
+  <div class="section-label" style="margin:4px 0 10px">Avg Total Earned · Day of Week</div>
+  <div class="chart-wrap" id="dow-chart"></div>
+  <div class="section-label" style="margin:14px 0 10px">Avg Total Earned · Weather</div>
+  <div class="chart-wrap" id="wx-chart"></div>
+</div>
+
+<!-- ══ PORTAL PANEL ══ -->
+<div class="panel" id="panel-portal">
+  <div class="portal-card">
+    <div class="portal-logo">🚗</div>
+    <div class="portal-name">Drivosity</div>
+    <div class="portal-url">dipm.drivosity.com/login</div>
+
+    <a class="btn-portal" href="https://dipm.drivosity.com/login" target="_blank" onclick="stampPortal('in')">
+      ▶ Clock In
+    </a>
+    <a class="btn-portal out" href="https://dipm.drivosity.com/login" target="_blank" onclick="stampPortal('out')">
+      ■ Clock Out
+    </a>
+
+    <p class="portal-hint">Opens the Drivosity login page in a new tab.<br>Come back here when done.</p>
+  </div>
+
+  <!-- Delivery Experience app launcher -->
+  <div class="portal-card" style="margin-top:0">
+    <div class="portal-logo">🍕</div>
+    <div class="portal-name">Delivery Experience</div>
+    <div class="portal-url">Domino's driver app</div>
+
+    <a class="btn-portal"
+       href="https://play.google.com/store/apps/details?id=com.dominos.driver.app"
+       target="_blank"
+       style="background:var(--blue);box-shadow:0 4px 24px rgba(96,165,250,.3)">
+      ▶ Open App
+    </a>
+
+    <p class="portal-hint">Opens the Delivery Experience app listing.<br>Tap <strong style="color:var(--text)">Open</strong> on the Play Store page to launch it.</p>
+  </div>
+
+  <!-- Stamp history -->
+  <div class="portal-stamps" id="portalStamps"></div>
+</div>
+
+<!-- ══ GOOGLE DRIVE MODAL ══ -->
+<div class="modal-bg hidden" id="driveModal">
+  <div class="modal">
+    <h2>🔗 Link Google Drive</h2>
+    <p class="modal-sub">Data saved as <strong style="color:var(--amber)">delivery_data.json</strong> in your Google Drive.</p>
+    <div id="drive-has-id" class="hidden">
+      <p style="font-size:.8rem;color:var(--subtext);margin-bottom:12px">Client ID saved. Tap below to sign in.</p>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+        <input type="text" id="drive-id-display" readonly style="font-size:.7rem;flex:1">
+        <button onclick="clearDriveId()" style="padding:8px 10px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;font-family:var(--head);font-size:.7rem;letter-spacing:1px;text-transform:uppercase">Clear</button>
+      </div>
+      <button class="btn-modal-ok" style="background:var(--purple);width:100%" onclick="signInDrive()">Sign In &amp; Connect</button>
+      <button class="btn-modal-cancel" style="width:100%;margin-top:8px" onclick="closeDriveModal()">Cancel</button>
+    </div>
+    <div id="drive-setup">
+      <p style="font-size:.75rem;color:var(--amber);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">One-Time Setup (≈ 3 min)</p>
+      <div class="step"><div class="step-num">Step 1</div><p>Open <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a>, sign in, tap <strong>New Project</strong> → name it <code>DeliveryTracker</code> → Create.</p></div>
+      <div class="step"><div class="step-num">Step 2</div><p>Go to <strong>APIs &amp; Services → Library</strong>, search <strong>Google Drive API</strong>, tap Enable.</p></div>
+      <div class="step"><div class="step-num">Step 3</div><p>Go to <strong>OAuth consent screen → External → Create</strong>. Fill in app name &amp; your email. Save through all steps.</p></div>
+      <div class="step"><div class="step-num">Step 4</div><p>Go to <strong>Credentials → Create Credentials → OAuth client ID → Web application</strong>. Under Authorized JavaScript origins add <code>null</code>. Tap Create.</p></div>
+      <div class="step"><div class="step-num">Step 5</div><p>Copy the <strong>Client ID</strong> (ends in <code>.apps.googleusercontent.com</code>) and paste below.</p></div>
+      <div class="modal-field"><label>Your Google Client ID</label><input type="text" id="drive-client-id" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off"></div>
+      <div class="modal-btns">
+        <button class="btn-modal-ok" onclick="saveDriveId()">Save &amp; Connect</button>
+        <button class="btn-modal-cancel" onclick="closeDriveModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════
+const LS     = 'dtlog_v5';        // bumped version key
+const LS_CID = 'dtlog_gcid';
+const LS_FID = 'dtlog_gfid';
+const SCOPE  = 'https://www.googleapis.com/auth/drive.file';
+const FNAME  = 'delivery_data.json';
+const MIME   = 'application/json';
+const USB_OPTS = {types:[{description:'Delivery Data',accept:{'application/json':['.json']}}],suggestedName:FNAME};
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let entries    = [];
+let paychecks  = [];
+let fileHandle = null;
+let driveToken = null;
+let driveFid   = null;
+let weatherSel = null;
+let holidaySel = '';
+let hFilter    = 'all';
+let sFilter    = 'week';
+let editingId  = null;   // null = new entry, number = editing existing
+
+// ══════════════════════════════════════════
+// DATA MIGRATION
+// Ensures old saves work with new field names.
+// Old format used `tips` for card tips; new uses `tipsPaid`.
+// New field `totalTips = tipsPaid + cash` drives all calcs.
+// ══════════════════════════════════════════
+function migrateEntry(e) {
+  // Handle old `tips` field → tipsPaid
+  if (e.tipsPaid === undefined) {
+    e.tipsPaid = e.tips !== undefined ? e.tips : 0;
+  }
+  // cash defaults to 0 if missing
+  if (e.cash === undefined) e.cash = 0;
+  // miles optional — keep as-is, just ensure not undefined
+  if (e.miles === undefined) e.miles = null;
+  // totalTips = tipsPaid + cash (always recompute for correctness)
+  e.totalTips = +(e.tipsPaid + e.cash).toFixed(2);
+  // recompute per-hour using totalTips
+  e.tph  = e.hours > 0 ? +(e.totalTips / e.hours).toFixed(2) : 0;
+  e.tpr  = (e.runs||0) > 0 ? +(e.totalTips / e.runs).toFixed(2) : 0;
+  return e;
+}
+
+function migrateAll(raw) {
+  const result = {};
+  result.entries   = (Array.isArray(raw.entries)   ? raw.entries   :
+                      Array.isArray(raw)            ? raw           : []).map(migrateEntry);
+  result.paychecks = Array.isArray(raw.paychecks)  ? raw.paychecks : [];
+  return result;
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+(function init() {
+  loadFromLS();
+  driveFid = localStorage.getItem(LS_FID) || null;
+
+  const today = localDateStr();
+  document.getElementById('f-date').value = today;
+  document.getElementById('f-date').addEventListener('change', updateDOW);
+  document.getElementById('hol-none').addEventListener('click', clearHoliday);
+  document.getElementById('p-end').value = today;
+
+  updateDOW(); setNowTime(); tickClock(); setInterval(tickClock, 30000);
+
+  // Load saved weekly goal
+  const savedGoal = localStorage.getItem('dtlog_weekgoal');
+  if (savedGoal) document.getElementById('weekGoalInput').value = savedGoal;
+
+  renderHistory(); renderPaychecks(); renderStats();
+})();
+
+function loadFromLS() {
+  try {
+    // Collect every dtlog_* key in localStorage — covers ALL past versions
+    const KNOWN_KEYS = ['dtlog_v5','dtlog_v4','dtlog_v3','dtlog_v2','dtlog_v1','dtlog'];
+    // Also dynamically scan for any other dtlog_ keys that might exist
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('dtlog') && !KNOWN_KEYS.includes(k)) KNOWN_KEYS.push(k);
+    }
+
+    let bestRaw = null;
+    let bestCount = -1;
+
+    for (const key of KNOWN_KEYS) {
+      const val = localStorage.getItem(key);
+      if (!val) continue;
+      try {
+        const parsed = JSON.parse(val);
+        const mig = migrateAll(parsed);
+        const count = mig.entries.length + mig.paychecks.length;
+        if (count > bestCount) { bestCount = count; bestRaw = mig; }
+      } catch { /* skip unparseable key */ }
+    }
+
+    if (bestRaw && bestCount > 0) {
+      entries   = bestRaw.entries;
+      paychecks = bestRaw.paychecks;
+    } else {
+      entries = []; paychecks = [];
+    }
+
+    // Consolidate under current key
+    saveToLS();
+  } catch { entries = []; paychecks = []; }
+}
+
+function saveToLS() {
+  localStorage.setItem(LS, JSON.stringify({ entries, paychecks }));
+}
+
+function tickClock() {
+  document.getElementById('headerMeta').textContent =
+    new Date().toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function setNowTime() {
+  const n = new Date();
+  document.getElementById('f-start').value =
+    String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+}
+function updateDOW() {
+  const v = document.getElementById('f-date').value; if (!v) return;
+  const [y,m,d] = v.split('-').map(Number);
+  document.getElementById('f-dow').value =
+    ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date(y,m-1,d).getDay()];
+}
+
+// ══════════════════════════════════════════
+// PERSIST
+// ══════════════════════════════════════════
+async function persist() {
+  saveToLS();
+  const out = [];
+  if (fileHandle) { const ok = await writeUSB();        if (ok) out.push('USB');   }
+  if (driveToken && driveFid) { const ok = await writeDriveFile(); if (ok) out.push('Drive'); }
+  if (!fileHandle && !driveToken) {
+    toast('Saved to phone — link USB or Drive for backup', 'warn'); return;
+  }
+  if (out.length) toast('Saved to ' + out.join(' + '), 'ok');
+}
+
+// ══════════════════════════════════════════
+// FORM TOGGLES
+// ══════════════════════════════════════════
+function togW(btn) {
+  document.querySelectorAll('#weather-group .tog').forEach(b => b.classList.remove('active'));
+  weatherSel = (weatherSel === btn.dataset.val) ? null : (btn.classList.add('active'), btn.dataset.val);
+}
+function togH(btn) {
+  document.querySelectorAll('#holiday-group .tog').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); holidaySel = btn.dataset.val;
+}
+function clearHoliday() {
+  document.querySelectorAll('#holiday-group .tog').forEach(b => b.classList.remove('active'));
+  document.getElementById('hol-none').classList.add('active'); holidaySel = '';
+}
+
+// ══════════════════════════════════════════
+// SAVE / UPDATE SHIFT
+// ══════════════════════════════════════════
+async function saveEntry() {
+  const date  = document.getElementById('f-date').value;
+  const start = document.getElementById('f-start').value;
+  const end   = document.getElementById('f-end').value;
+  const tipsPaid = parseFloat(document.getElementById('f-tips').value);
+  const cash     = parseFloat(document.getElementById('f-cash').value);
+
+  if (!date || !start || !end || isNaN(tipsPaid) || isNaN(cash)) {
+    toast('Fill in Date, Times, Tips Paid Out & Cash Tips', 'err'); return;
+  }
+
+  const milesRaw = document.getElementById('f-miles').value;
+  const miles    = milesRaw !== '' ? parseFloat(milesRaw) : null;
+  const runs     = parseInt(document.getElementById('f-runs').value) || 0;
+  const notes    = document.getElementById('f-notes').value.trim();
+  const dow      = document.getElementById('f-dow').value;
+
+  const [sh,sm] = start.split(':').map(Number), [eh,em] = end.split(':').map(Number);
+  let mins = (eh*60+em) - (sh*60+sm); if (mins < 0) mins += 1440;
+  const hours    = +(mins / 60).toFixed(2);
+  const tod      = sh>=5&&sh<12?'Morning':sh>=12&&sh<17?'Afternoon':sh>=17&&sh<21?'Evening':'Night';
+  const totalTips = +(tipsPaid + cash).toFixed(2);
+
+  const entryData = {
+    date, dow, start, end, hours, tod,
+    tipsPaid, cash, totalTips, miles, runs,
+    weather:  weatherSel || null,
+    holiday:  holidaySel || null,
+    notes,
+    tph: hours > 0 ? +(totalTips / hours).toFixed(2) : 0,
+    tpr: runs  > 0 ? +(totalTips / runs).toFixed(2)  : 0,
+  };
+
+  if (editingId !== null) {
+    // UPDATE existing
+    const idx = entries.findIndex(e => e.id === editingId);
+    if (idx !== -1) {
+      entries[idx] = { ...entries[idx], ...entryData };
+    }
+    cancelEdit();
+    toast('Shift updated', 'ok');
+  } else {
+    // NEW entry
+    entries.unshift({ id: Date.now(), ...entryData });
+  }
+
+  await persist();
+  resetForm();
+  renderHistory(); renderStats();
+}
+
+function resetForm() {
+  ['f-tips','f-cash','f-miles','f-runs','f-notes','f-end'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  weatherSel = null;
+  document.querySelectorAll('#weather-group .tog').forEach(b => b.classList.remove('active'));
+  clearHoliday();
+}
+
+// ══════════════════════════════════════════
+// EDIT MODE
+// ══════════════════════════════════════════
+function editEntry(id) {
+  const e = entries.find(e => e.id === id);
+  if (!e) return;
+
+  editingId = id;
+
+  // Fill form
+  document.getElementById('f-date').value  = e.date;
+  updateDOW();
+  document.getElementById('f-start').value = e.start;
+  document.getElementById('f-end').value   = e.end;
+  document.getElementById('f-tips').value  = e.tipsPaid;
+  document.getElementById('f-cash').value  = e.cash;
+  document.getElementById('f-miles').value = e.miles !== null ? e.miles : '';
+  document.getElementById('f-runs').value  = e.runs || '';
+  document.getElementById('f-notes').value = e.notes || '';
+
+  // Weather toggle
+  weatherSel = e.weather || null;
+  document.querySelectorAll('#weather-group .tog').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === weatherSel);
+  });
+
+  // Holiday toggle
+  holidaySel = e.holiday || '';
+  document.querySelectorAll('#holiday-group .tog').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === holidaySel);
+  });
+  if (!holidaySel) document.getElementById('hol-none').classList.add('active');
+
+  // Update UI
+  document.getElementById('editBanner').classList.remove('hidden');
+  document.getElementById('submitBtn').textContent = '✏️ UPDATE SHIFT';
+  document.getElementById('submitBtn').classList.add('edit-mode');
+
+  // Switch to log tab and scroll to top
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-log').classList.add('active');
+  document.querySelector('.tab').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelEdit() {
+  editingId = null;
+  document.getElementById('editBanner').classList.add('hidden');
+  document.getElementById('submitBtn').textContent = '▶ SAVE SHIFT';
+  document.getElementById('submitBtn').classList.remove('edit-mode');
+  resetForm();
+  // Reset date/time to today
+  const today = localDateStr();
+  document.getElementById('f-date').value = today;
+  updateDOW(); setNowTime();
+}
+
+// ══════════════════════════════════════════
+// DELETE SHIFT
+// ══════════════════════════════════════════
+async function delEntry(id) {
+  if (!confirm('Delete this shift?')) return;
+  if (editingId === id) cancelEdit();
+  entries = entries.filter(e => e.id !== id);
+  await persist(); renderHistory(); renderStats();
+}
+
+// ══════════════════════════════════════════
+// PAYCHECK
+// ══════════════════════════════════════════
+async function savePaycheck() {
+  const amount = parseFloat(document.getElementById('p-amount').value);
+  const start  = document.getElementById('p-start').value;
+  const end    = document.getElementById('p-end').value;
+  const note   = document.getElementById('p-note').value.trim();
+  if (isNaN(amount) || amount <= 0 || !start || !end) { toast('Fill in amount and date range','err'); return; }
+  if (start > end) { toast('Start must be before end','err'); return; }
+  paychecks.unshift({ id: Date.now(), amount, start, end, note });
+  await persist();
+  document.getElementById('p-amount').value = '';
+  document.getElementById('p-start').value  = '';
+  document.getElementById('p-note').value   = '';
+  renderPaychecks(); renderStats();
+}
+
+async function delPaycheck(id) {
+  if (!confirm('Delete this paycheck?')) return;
+  paychecks = paychecks.filter(p => p.id !== id);
+  await persist(); renderPaychecks(); renderStats();
+}
+
+// ══════════════════════════════════════════
+// HOURLY RATE CALCULATION
+// Uses totalTips (tipsPaid + cash) for all $/hr figures
+// ══════════════════════════════════════════
+function calcHourly(periodEntries) {
+  const totEarned = periodEntries.reduce((s,e) => s + e.totalTips, 0);
+  const totHours  = periodEntries.reduce((s,e) => s + e.hours, 0);
+  const earnedPH  = totHours > 0 ? totEarned / totHours : 0;
+
+  if (!paychecks.length) return { earnedPH, basePerHour:0, totalPerHour:earnedPH, hasPaychecks:false };
+
+  const periodDates = new Set(periodEntries.map(e => e.date));
+  let totalBaseWages = 0;
+
+  paychecks.forEach(ck => {
+    const shiftsInCheck  = entries.filter(e => e.date >= ck.start && e.date <= ck.end);
+    const hoursInCheck   = shiftsInCheck.reduce((s,e) => s + e.hours, 0);
+    if (!hoursInCheck) return;
+    const shiftsInPeriod = shiftsInCheck.filter(e => periodDates.has(e.date));
+    const hoursInPeriod  = shiftsInPeriod.reduce((s,e) => s + e.hours, 0);
+    if (!hoursInPeriod) return;
+    totalBaseWages += (hoursInPeriod / hoursInCheck) * ck.amount;
+  });
+
+  const basePerHour  = totHours > 0 ? totalBaseWages / totHours : 0;
+  const totalPerHour = earnedPH + basePerHour;
+  return { earnedPH, basePerHour, totalPerHour, hasPaychecks: true, totalBaseWages };
+}
+
+// ══════════════════════════════════════════
+// SHIFT TIMER
+// ══════════════════════════════════════════
+let timerInterval  = null;
+let timerStartTime = null;   // Date object when shift started
+
+// Restore timer state if app was closed mid-shift
+(function restoreTimer() {
+  const saved = localStorage.getItem('dtlog_timer');
+  if (!saved) return;
+  try {
+    const { startTs } = JSON.parse(saved);
+    timerStartTime = new Date(startTs);
+    startTimerTick();
+  } catch { localStorage.removeItem('dtlog_timer'); }
+})();
+
+function timerStart() {
+  if (timerInterval) return;
+  timerStartTime = new Date();
+  // Set start time field
+  document.getElementById('f-date').value  = localDateStr(timerStartTime);
+  updateDOW();
+  document.getElementById('f-start').value =
+    String(timerStartTime.getHours()).padStart(2,'0') + ':' +
+    String(timerStartTime.getMinutes()).padStart(2,'0');
+  // Save to localStorage so timer survives app close
+  localStorage.setItem('dtlog_timer', JSON.stringify({ startTs: timerStartTime.toISOString() }));
+  startTimerTick();
+  toast('Shift started — timer running', 'ok');
+}
+
+function startTimerTick() {
+  const block   = document.getElementById('timerBlock');
+  const display = document.getElementById('timerDisplay');
+  const status  = document.getElementById('timerStatus');
+  block.classList.add('running');
+  display.classList.add('running');
+  document.getElementById('timerBtnsIdle').classList.add('hidden');
+  document.getElementById('timerBtnsRunning').classList.remove('hidden');
+
+  timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - timerStartTime) / 1000);
+    const h = String(Math.floor(elapsed / 3600)).padStart(2,'0');
+    const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2,'0');
+    const s = String(elapsed % 60).padStart(2,'0');
+    display.textContent = `${h}:${m}:${s}`;
+    status.textContent  = 'Running';
+  }, 1000);
+}
+
+function timerEnd() {
+  if (!timerInterval) return;
+  clearInterval(timerInterval); timerInterval = null;
+  localStorage.removeItem('dtlog_timer');
+
+  const now = new Date();
+  document.getElementById('f-end').value =
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0');
+
+  // Reset UI but keep the elapsed time visible
+  document.getElementById('timerBlock').classList.remove('running');
+  document.getElementById('timerDisplay').classList.remove('running');
+  document.getElementById('timerStatus').textContent = 'Ended — fill in earnings below';
+  document.getElementById('timerBtnsRunning').classList.add('hidden');
+  document.getElementById('timerBtnsIdle').classList.remove('hidden');
+  document.querySelector('.btn-timer-start').textContent = '▶ New Shift';
+  timerStartTime = null;
+  toast('Shift ended — start & end times filled in', 'ok');
+}
+
+function timerCancel() {
+  if (!confirm('Cancel the running timer? Start time will be cleared.')) return;
+  clearInterval(timerInterval); timerInterval = null;
+  timerStartTime = null;
+  localStorage.removeItem('dtlog_timer');
+  document.getElementById('timerBlock').classList.remove('running');
+  document.getElementById('timerDisplay').classList.remove('running');
+  document.getElementById('timerDisplay').textContent = '00:00:00';
+  document.getElementById('timerStatus').textContent  = 'Not started';
+  document.getElementById('timerBtnsRunning').classList.add('hidden');
+  document.getElementById('timerBtnsIdle').classList.remove('hidden');
+  document.querySelector('.btn-timer-start').textContent = '▶ Start Shift';
+  document.getElementById('f-start').value = '';
+  document.getElementById('f-end').value   = '';
+}
+
+// ══════════════════════════════════════════
+// TABS & FILTERS
+// ══════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active'); btn.classList.add('active');
+}
+function setHF(f, btn) {
+  hFilter = f;
+  document.querySelectorAll('#panel-history .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); renderHistory();
+}
+function setSF(f, btn) {
+  sFilter = f;
+  document.querySelectorAll('#panel-stats .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); renderStats();
+}
+
+function filtered(p) {
+  const now = new Date(); now.setHours(0,0,0,0);
+  return entries.filter(e => {
+    if (p === 'all')      return true;
+    if (p === 'holidays') return !!e.holiday;
+    const d = new Date(e.date + 'T00:00:00');
+    if (p === 'week')  {
+      const ws = new Date(now);
+      const day = now.getDay();
+      // Monday = start of week. getDay(): 0=Sun,1=Mon...6=Sat
+      const daysBack = day === 0 ? 6 : day - 1;
+      ws.setDate(now.getDate() - daysBack);
+      return d >= ws;
+    }
+    if (p === 'month') return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+    return true;
+  });
+}
+
+// ══════════════════════════════════════════
+// WEEKLY SUMMARY BANNER
+// ══════════════════════════════════════════
+function renderWeeklySummary() {
+  const el = document.getElementById('weekSummary');
+  if (!el) return;
+
+  // Get Mon–Sun week bounds
+  const now = new Date(); now.setHours(0,0,0,0);
+  const day = now.getDay();
+  const daysBack = day === 0 ? 6 : day - 1;
+  const weekStart = new Date(now); weekStart.setDate(now.getDate() - daysBack);
+  const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+
+  const weekEntries = entries.filter(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    return d >= weekStart && d <= weekEnd;
+  });
+
+  const totEarned = weekEntries.reduce((s,e) => s + e.totalTips, 0);
+  const totHours  = weekEntries.reduce((s,e) => s + e.hours, 0);
+  const totRuns   = weekEntries.reduce((s,e) => s + (e.runs||0), 0);
+  const avgPH     = totHours > 0 ? totEarned / totHours : 0;
+  const shifts    = weekEntries.length;
+
+  // Check for a goal stored in localStorage
+  const weekGoal  = parseFloat(localStorage.getItem('dtlog_weekgoal') || '0');
+  const pct       = weekGoal > 0 ? Math.min(totEarned / weekGoal * 100, 100) : 0;
+
+  const dayNames  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const todayIdx  = day === 0 ? 6 : day - 1;  // 0=Mon … 6=Sun
+  const weekLabel = `${weekStart.toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${weekEnd.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+
+  el.innerHTML = `
+    <div class="ws-title">📅 This Week &nbsp;·&nbsp; ${weekLabel}</div>
+    <div class="ws-grid">
+      <div class="ws-item"><span class="ws-label">Earned</span><span class="ws-val money">$${totEarned.toFixed(2)}</span></div>
+      <div class="ws-item"><span class="ws-label">$/hr</span><span class="ws-val" style="color:var(--teal)">$${avgPH.toFixed(2)}</span></div>
+      <div class="ws-item"><span class="ws-label">Hours</span><span class="ws-val">${totHours.toFixed(1)}</span></div>
+      <div class="ws-item"><span class="ws-label">Shifts</span><span class="ws-val">${shifts}</span></div>
+    </div>
+    ${weekGoal > 0 ? `
+    <div class="ws-progress">
+      <div class="ws-prog-row">
+        <span class="ws-prog-label">Weekly goal</span>
+        <span class="ws-prog-val">$${totEarned.toFixed(0)} / $${weekGoal.toFixed(0)}</span>
+      </div>
+      <div class="ws-bar-bg"><div class="ws-bar" style="width:${pct.toFixed(1)}%"></div></div>
+    </div>` : `
+    <div style="margin-top:8px;font-size:.65rem;color:var(--muted)">
+      💡 Set a weekly earnings goal in Stats to see a progress bar here.
+    </div>`}`;
+}
+
+// ══════════════════════════════════════════
+// RENDER HISTORY
+// ══════════════════════════════════════════
+function renderHistory() {
+  renderWeeklySummary();
+  const list = document.getElementById('log-list');
+  const data = filtered(hFilter);
+  if (!data.length) {
+    list.innerHTML = `<div class="empty"><div class="e-icon">🚗</div><p>No shifts logged yet.</p></div>`;
+    return;
+  }
+  list.innerHTML = data.map(e => `
+    <div class="log-entry${e.holiday ? ' holiday-entry' : ''}">
+      <div class="log-header">
+        <div class="log-date-line">
+          <div class="log-date">${fmtDate(e.date)}</div>
+          <div class="log-day">${e.dow} · ${e.tod} · ${e.start}–${e.end}</div>
+        </div>
+        <div class="entry-actions">
+          <button class="btn-act edit" onclick="editEntry(${e.id})">EDIT</button>
+          <button class="btn-act del"  onclick="delEntry(${e.id})">DEL</button>
+        </div>
+      </div>
+      <div class="log-badge">
+        ${e.holiday ? `<span class="badge badge-h">🎉 ${e.holiday}</span>` : ''}
+        ${e.weather ? `<span class="badge badge-w">${wIcon(e.weather)} ${e.weather}</span>` : ''}
+      </div>
+      <div class="log-numbers">
+        <div class="log-num"><span class="n-label">Total Earned</span><span class="n-val n-total">$${e.totalTips.toFixed(2)}</span></div>
+        <div class="log-num"><span class="n-label">Tips Paid</span><span class="n-val n-paid">$${e.tipsPaid.toFixed(2)}</span></div>
+        <div class="log-num"><span class="n-label">Cash Tips</span><span class="n-val n-cash">$${e.cash.toFixed(2)}</span></div>
+        <div class="log-num"><span class="n-label">$/hr</span><span class="n-val" style="color:var(--subtext)">$${e.tph}</span></div>
+        <div class="log-num"><span class="n-label">Hours</span><span class="n-val n-hours">${e.hours.toFixed(1)}h</span></div>
+        <div class="log-num"><span class="n-label">${e.miles !== null ? 'Miles' : 'Runs'}</span>
+          <span class="n-val ${e.miles !== null ? 'n-miles' : ''}">${e.miles !== null ? e.miles.toFixed(1) : (e.runs || '—')}</span>
+        </div>
+      </div>
+      ${e.notes ? `<div class="log-notes">📝 ${e.notes}</div>` : ''}
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// RENDER PAYCHECKS
+// ══════════════════════════════════════════
+function renderPaychecks() {
+  const list = document.getElementById('check-list');
+  if (!paychecks.length) {
+    list.innerHTML = `<div class="empty"><div class="e-icon">💵</div><p>No paychecks logged yet.</p></div>`;
+    return;
+  }
+  list.innerHTML = paychecks.map(ck => {
+    const shifts     = entries.filter(e => e.date >= ck.start && e.date <= ck.end);
+    const hoursInPd  = shifts.reduce((s,e) => s + e.hours, 0);
+    const earnedInPd = shifts.reduce((s,e) => s + e.totalTips, 0);
+    const baseHr     = hoursInPd > 0 ? ck.amount / hoursInPd : 0;
+    const totalHr    = hoursInPd > 0 ? (ck.amount + earnedInPd) / hoursInPd : 0;
+    return `<div class="check-entry">
+      <button class="btn-act del" style="position:absolute;top:10px;right:10px" onclick="delPaycheck(${ck.id})">DEL</button>
+      <div class="check-amount">$${ck.amount.toFixed(2)}</div>
+      <div class="check-range">📅 ${fmtDate(ck.start)} → ${fmtDate(ck.end)}</div>
+      ${ck.note ? `<div class="check-note">📝 ${ck.note}</div>` : ''}
+      <div class="check-meta">
+        <div class="check-meta-item"><span class="cm-label">Hours Logged</span><span class="cm-val">${hoursInPd.toFixed(1)}h</span></div>
+        <div class="check-meta-item"><span class="cm-label">Base $/hr</span><span class="cm-val" style="color:var(--blue)">$${baseHr.toFixed(2)}</span></div>
+        <div class="check-meta-item"><span class="cm-label">Tips Earned</span><span class="cm-val" style="color:var(--green)">$${earnedInPd.toFixed(2)}</span></div>
+        <div class="check-meta-item"><span class="cm-label">Combined $/hr</span><span class="cm-val" style="color:var(--teal)">$${totalHr.toFixed(2)}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// RENDER STATS
+// ══════════════════════════════════════════
+function renderStats() {
+  const data  = filtered(sFilter);
+  const hc    = document.getElementById('hourly-card');
+  const cards = document.getElementById('stat-cards');
+
+  if (!data.length) {
+    hc.innerHTML = `<div class="hc-title">⏱ Hourly Breakdown</div><p style="color:var(--muted);font-size:.8rem">No shifts in this period.</p>`;
+    cards.innerHTML = ''; document.getElementById('dow-chart').innerHTML = ''; document.getElementById('wx-chart').innerHTML = '';
+    return;
+  }
+
+  const sum = k => data.reduce((s,e) => s + e[k], 0);
+  const totEarned = sum('totalTips');
+  const totPaid   = sum('tipsPaid');
+  const totCash   = sum('cash');
+  const totMiles  = data.filter(e => e.miles !== null).reduce((s,e) => s + e.miles, 0);
+  const milesCount= data.filter(e => e.miles !== null).length;
+  const totHours  = sum('hours');
+  const totRuns   = data.reduce((s,e) => s + (e.runs||0), 0);
+  const best      = [...data].sort((a,b) => b.totalTips - a.totalTips)[0];
+
+  // Hourly breakdown card
+  const { earnedPH, basePerHour, totalPerHour, hasPaychecks, totalBaseWages } = calcHourly(data);
+  let hcHTML = `<div class="hc-title">⏱ Hourly Rate Breakdown</div>
+    <div class="hourly-row">
+      <span class="hr-label">Tips Earned / Hour</span>
+      <div style="text-align:right">
+        <div class="hr-val tips-color">$${earnedPH.toFixed(2)}</div>
+        <div class="hr-note">$${totPaid.toFixed(2)} paid + $${totCash.toFixed(2)} cash · ${totHours.toFixed(1)}h</div>
+      </div>
+    </div>`;
+
+  if (hasPaychecks && basePerHour > 0) {
+    hcHTML += `
+    <div class="hourly-row">
+      <span class="hr-label">Base Wage / Hour</span>
+      <div style="text-align:right">
+        <div class="hr-val base-color">$${basePerHour.toFixed(2)}</div>
+        <div class="hr-note">$${(totalBaseWages||0).toFixed(2)} prorated wages</div>
+      </div>
+    </div>
+    <div class="hourly-row divider">
+      <span class="hr-label" style="font-weight:700;color:var(--text)">Total $/Hour</span>
+      <div style="text-align:right">
+        <div class="hr-val total-color">$${totalPerHour.toFixed(2)}</div>
+        <div class="hr-note">tips + base pay combined</div>
+      </div>
+    </div>`;
+  } else {
+    hcHTML += `<div style="margin-top:8px;padding:8px;background:#1e2330;border-radius:6px;font-size:.72rem;color:var(--muted)">
+      💡 Log paychecks in the <strong style="color:var(--teal)">Pay</strong> tab to see combined hourly with base wages.
+    </div>`;
+  }
+  hc.innerHTML = hcHTML;
+
+  // Stat cards
+  cards.innerHTML = `
+    <div class="stat-card"><div class="s-label">Total Earned</div><div class="s-val">$${totEarned.toFixed(2)}</div><div class="s-sub">${data.length} shifts</div></div>
+    <div class="stat-card"><div class="s-label">Tips Paid Out</div><div class="s-val">$${totPaid.toFixed(2)}</div><div class="s-sub">+ $${totCash.toFixed(2)} cash</div></div>
+    <div class="stat-card"><div class="s-label">Hours Worked</div><div class="s-val">${totHours.toFixed(1)}</div><div class="s-sub">avg ${(totHours/data.length).toFixed(1)}h/shift</div></div>
+    <div class="stat-card"><div class="s-label">Best Shift</div><div class="s-val">$${best.totalTips.toFixed(2)}</div><div class="s-sub">${best.dow} ${fmtDate(best.date)}</div></div>
+    <div class="stat-card"><div class="s-label">Total Runs</div><div class="s-val">${totRuns}</div><div class="s-sub">$${totRuns>0?(totEarned/totRuns).toFixed(2):'—'} avg/run</div></div>
+    ${milesCount > 0
+      ? `<div class="stat-card"><div class="s-label">Total Miles</div><div class="s-val">${totMiles.toFixed(1)}</div><div class="s-sub">${(totMiles/milesCount).toFixed(1)} avg/shift</div></div>`
+      : `<div class="stat-card"><div class="s-label">$/Mile</div><div class="s-val">—</div><div class="s-sub">no miles logged</div></div>`}
+  `;
+
+  // DOW chart (by totalTips)
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dm = {}; DAYS.forEach(d => dm[d] = {t:0, c:0});
+  data.forEach(e => { const s = e.dow.slice(0,3); if (dm[s]) { dm[s].t += e.totalTips; dm[s].c++; } });
+  const mx1 = Math.max(...Object.values(dm).map(v => v.c > 0 ? v.t/v.c : 0), 1);
+  document.getElementById('dow-chart').innerHTML = DAYS.map(d => {
+    const avg = dm[d].c > 0 ? dm[d].t/dm[d].c : 0;
+    return `<div class="chart-row"><span class="chart-label">${d}</span>
+      <div class="chart-bar-bg"><div class="chart-bar" style="width:${(avg/mx1*100).toFixed(1)}%">
+        ${avg > 0 ? `<span>$${avg.toFixed(0)}</span>` : ''}
+      </div></div></div>`;
+  }).join('');
+
+  // Weather chart
+  const wm = {};
+  data.filter(e => e.weather).forEach(e => {
+    if (!wm[e.weather]) wm[e.weather] = {t:0,c:0};
+    wm[e.weather].t += e.totalTips; wm[e.weather].c++;
+  });
+  const we = Object.entries(wm).sort((a,b) => (b[1].t/b[1].c) - (a[1].t/a[1].c));
+  const mx2 = Math.max(...we.map(([,v]) => v.t/v.c), 1);
+  document.getElementById('wx-chart').innerHTML = we.length
+    ? we.map(([w,v]) => { const avg = v.t/v.c; return `<div class="chart-row">
+        <span class="chart-label" style="width:36px;font-size:.6rem">${wIcon(w)}</span>
+        <div class="chart-bar-bg"><div class="chart-bar" style="width:${(avg/mx2*100).toFixed(1)}%">
+          <span>$${avg.toFixed(0)}</span>
+        </div></div></div>`; }).join('')
+    : '<p style="color:var(--muted);font-size:.75rem;padding:8px 0">No weather data yet.</p>';
+}
+
+// ══════════════════════════════════════════
+// EXPORT CSV
+// ══════════════════════════════════════════
+function exportCSV() {
+  if (!entries.length) { toast('Nothing to export','warn'); return; }
+  const h = ['Date','Day','Start','End','Hours','TimeOfDay','TipsPaidOut','CashTips','TotalEarned','Miles','Runs','TotalPerHour','PerRun','Weather','Holiday','Notes'];
+  const rows = entries.map(e => [
+    e.date, e.dow, e.start, e.end, e.hours, e.tod,
+    e.tipsPaid, e.cash, e.totalTips,
+    e.miles !== null ? e.miles : '',
+    e.runs||0, e.tph, e.tpr,
+    e.weather||'', e.holiday||'', (e.notes||'').replace(/,/g,';')
+  ]);
+  const csv = [h, ...rows].map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `delivery_log_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+// ══════════════════════════════════════════
+// USB FILE SYSTEM ACCESS
+// ══════════════════════════════════════════
+async function connectUSB() {
+  if (!('showOpenFilePicker' in window)) { toast('Browser does not support direct file access','warn'); return; }
+  try {
+    const [fh] = await window.showOpenFilePicker({ ...USB_OPTS, multiple: false });
+    fileHandle = fh;
+    const txt = await (await fileHandle.getFile()).text();
+    if (txt.trim()) {
+      try {
+        const raw = JSON.parse(txt);
+        const mig = migrateAll(raw);
+        const usbEIds = new Set(mig.entries.map(e => e.id));
+        const usbCIds = new Set(mig.paychecks.map(c => c.id));
+        entries   = [...mig.entries,   ...entries.filter(e => !usbEIds.has(e.id))].sort((a,b) => b.id-a.id);
+        paychecks = [...mig.paychecks, ...paychecks.filter(c => !usbCIds.has(c.id))].sort((a,b) => b.id-a.id);
+        saveToLS();
+        toast('Loaded ' + entries.length + ' shifts from USB', 'ok');
+      } catch { toast('Could not read USB file','warn'); }
+    } else { await writeUSB(); }
+    setUSBStatus(true, fh.name);
+    renderHistory(); renderPaychecks(); renderStats();
+  } catch(e) { if (e.name !== 'AbortError') createNewUSBFile(); }
+}
+async function createNewUSBFile() {
+  try {
+    fileHandle = await window.showSaveFilePicker(USB_OPTS);
+    await writeUSB(); setUSBStatus(true, fileHandle.name); toast('New USB file created','ok');
+  } catch(e) { if (e.name !== 'AbortError') toast('Could not access USB drive','err'); }
+}
+async function writeUSB() {
+  if (!fileHandle) return false;
+  try {
+    const w = await fileHandle.createWritable();
+    await w.write(JSON.stringify({ entries, paychecks }, null, 2));
+    await w.close(); return true;
+  } catch { toast('USB write failed','warn'); return false; }
+}
+function setUSBStatus(on, name) {
+  const p = document.getElementById('usbPill'), l = document.getElementById('usbLabel');
+  p.className = 'pill ' + (on ? 'usb-on' : 'usb-off');
+  l.textContent = on ? (name || 'USB Linked') : 'Link USB';
+}
+
+// ══════════════════════════════════════════
+// GOOGLE DRIVE
+// ══════════════════════════════════════════
+function openDriveModal() {
+  const cid = localStorage.getItem(LS_CID) || '';
+  if (cid) {
+    document.getElementById('drive-id-display').value = cid;
+    document.getElementById('drive-has-id').classList.remove('hidden');
+    document.getElementById('drive-setup').classList.add('hidden');
+  } else {
+    document.getElementById('drive-has-id').classList.add('hidden');
+    document.getElementById('drive-setup').classList.remove('hidden');
+    document.getElementById('drive-client-id').value = '';
+  }
+  document.getElementById('driveModal').classList.remove('hidden');
+}
+function closeDriveModal() { document.getElementById('driveModal').classList.add('hidden'); }
+function saveDriveId() {
+  const cid = document.getElementById('drive-client-id').value.trim();
+  if (!cid || !cid.includes('.apps.googleusercontent.com')) { toast('Paste a valid Client ID','err'); return; }
+  localStorage.setItem(LS_CID, cid); closeDriveModal(); signInDrive();
+}
+function clearDriveId() {
+  if (!confirm('Remove saved Client ID and disconnect Google Drive?')) return;
+  localStorage.removeItem(LS_CID); localStorage.removeItem(LS_FID);
+  driveToken = null; driveFid = null; setDriveStatus(false); closeDriveModal();
+}
+function loadGIS() {
+  return new Promise((res,rej) => {
+    if (window.google && window.google.accounts) { res(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.onload = res; s.onerror = () => rej(new Error('Failed to load GIS'));
+    document.head.appendChild(s);
+  });
+}
+async function signInDrive() {
+  closeDriveModal();
+  const cid = localStorage.getItem(LS_CID);
+  if (!cid) { toast('No Client ID saved','warn'); return; }
+  toast('Opening Google sign-in…','info');
+  try {
+    await loadGIS();
+    const tc = google.accounts.oauth2.initTokenClient({
+      client_id: cid, scope: SCOPE,
+      callback: async resp => {
+        if (resp.error) { toast('Sign-in failed: ' + resp.error,'err'); return; }
+        driveToken = resp.access_token;
+        toast('Signed in! Syncing…','info');
+        await syncDrive();
+      }
+    });
+    tc.requestAccessToken({ prompt:'consent' });
+  } catch { toast('Could not load Google sign-in','err'); }
+}
+async function syncDrive() {
+  try {
+    let fid = driveFid || await findDriveFile();
+    if (fid) {
+      driveFid = fid; localStorage.setItem(LS_FID, fid);
+      const remote = await readDriveFile(fid);
+      if (remote) {
+        const mig = migrateAll(remote);
+        const rEIds = new Set(mig.entries.map(e => e.id));
+        const rCIds = new Set(mig.paychecks.map(c => c.id));
+        entries   = [...mig.entries,   ...entries.filter(e => !rEIds.has(e.id))].sort((a,b) => b.id-a.id);
+        paychecks = [...mig.paychecks, ...paychecks.filter(c => !rCIds.has(c.id))].sort((a,b) => b.id-a.id);
+        saveToLS(); toast('Loaded from Drive','ok');
+      } else { await writeDriveFile(); toast('Drive connected','ok'); }
+    } else {
+      fid = await createDriveFile(); driveFid = fid; localStorage.setItem(LS_FID, fid);
+      toast('New Drive file created','ok');
+    }
+    setDriveStatus(true); renderHistory(); renderPaychecks(); renderStats();
+  } catch(e) { toast('Drive sync failed: ' + e.message,'err'); }
+}
+async function findDriveFile() {
+  const q = encodeURIComponent(`name='${FNAME}' and mimeType='${MIME}' and trashed=false`);
+  const r = await gFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
+  return r.files && r.files.length ? r.files[0].id : null;
+}
+async function readDriveFile(fid) {
+  const r = await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media`, { headers:{Authorization:'Bearer '+driveToken} });
+  if (!r.ok) throw new Error('Read failed: ' + r.status);
+  const txt = await r.text();
+  if (!txt.trim()) return null;
+  return JSON.parse(txt);
+}
+async function createDriveFile() {
+  const meta = JSON.stringify({name:FNAME,mimeType:MIME});
+  const body = JSON.stringify({entries,paychecks},null,2);
+  const bnd  = 'dlv_bnd';
+  const mp   = `--${bnd}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${bnd}\r\nContent-Type: ${MIME}\r\n\r\n${body}\r\n--${bnd}--`;
+  const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+    method:'POST', headers:{Authorization:'Bearer '+driveToken,'Content-Type':`multipart/related; boundary=${bnd}`}, body:mp
+  });
+  if (!r.ok) throw new Error('Create failed: ' + r.status);
+  return (await r.json()).id;
+}
+async function writeDriveFile() {
+  if (!driveFid || !driveToken) return false;
+  try {
+    const r = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFid}?uploadType=media`, {
+      method:'PATCH', headers:{Authorization:'Bearer '+driveToken,'Content-Type':MIME},
+      body: JSON.stringify({entries,paychecks},null,2)
+    });
+    if (!r.ok) throw new Error('Write failed ' + r.status);
+    return true;
+  } catch(e) { toast('Drive write failed: ' + e.message,'warn'); return false; }
+}
+async function gFetch(url) {
+  const r = await fetch(url, { headers:{Authorization:'Bearer '+driveToken} });
+  if (!r.ok) throw new Error('Drive API ' + r.status);
+  return r.json();
+}
+function setDriveStatus(on) {
+  const p = document.getElementById('drivePill'), l = document.getElementById('driveLabel');
+  p.className = 'pill ' + (on ? 'drive-on' : 'drive-off');
+  l.textContent = on ? 'Drive Linked' : 'Link Drive';
+}
+
+// ══════════════════════════════════════════
+// MANUAL JSON IMPORT
+// Lets users load a backup delivery_data.json
+// from anywhere — phone Files app, email, etc.
+// ══════════════════════════════════════════
+function handleImport(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const raw = JSON.parse(e.target.result);
+      const mig = migrateAll(raw);
+      if (!mig.entries.length && !mig.paychecks.length) {
+        toast('File appears empty — nothing imported', 'warn'); return;
+      }
+      // Merge: keep local entries not in the file
+      const impEIds = new Set(mig.entries.map(x => x.id));
+      const impCIds = new Set(mig.paychecks.map(x => x.id));
+      entries   = [...mig.entries,   ...entries.filter(x => !impEIds.has(x.id))].sort((a,b) => b.id-a.id);
+      paychecks = [...mig.paychecks, ...paychecks.filter(x => !impCIds.has(x.id))].sort((a,b) => b.id-a.id);
+      await persist();
+      renderHistory(); renderPaychecks(); renderStats();
+      toast('Imported ' + mig.entries.length + ' shifts, ' + mig.paychecks.length + ' paychecks', 'ok');
+    } catch { toast('Could not read file — make sure it is a valid JSON backup', 'err'); }
+    evt.target.value = ''; // reset so same file can be re-imported if needed
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════════════════
+// PORTAL STAMP LOG
+// Records each clock-in / clock-out tap with
+// a timestamp so you have a local record.
+// ══════════════════════════════════════════
+const LS_STAMPS = 'dtlog_stamps';
+let portalStamps = [];
+
+(function loadStamps() {
+  try { portalStamps = JSON.parse(localStorage.getItem(LS_STAMPS) || '[]'); } catch { portalStamps = []; }
+  renderStamps();
+})();
+
+function stampPortal(type) {
+  const now = new Date();
+  portalStamps.unshift({
+    type,  // 'in' or 'out'
+    ts: now.toISOString(),
+    label: now.toLocaleString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })
+  });
+  // Keep last 30 stamps
+  if (portalStamps.length > 30) portalStamps = portalStamps.slice(0, 30);
+  localStorage.setItem(LS_STAMPS, JSON.stringify(portalStamps));
+  renderStamps();
+}
+
+function renderStamps() {
+  const el = document.getElementById('portalStamps');
+  if (!el) return;
+  if (!portalStamps.length) {
+    el.innerHTML = `<div class="ps-title">Recent Activity</div><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:10px 0">No activity recorded yet.</p>`;
+    return;
+  }
+  el.innerHTML = `<div class="ps-title">Recent Activity</div>` +
+    portalStamps.slice(0, 10).map(s => `
+      <div class="ps-row">
+        <span class="ps-label">${s.type === 'in'
+          ? '<span style="color:var(--green)">● Clock In</span>'
+          : '<span style="color:var(--red)">● Clock Out</span>'}</span>
+        <span class="ps-val">${s.label}</span>
+      </div>`).join('') +
+    (portalStamps.length > 10 ? `<p style="font-size:.65rem;color:var(--muted);text-align:center;padding:8px 0">${portalStamps.length - 10} older entries hidden</p>` : '');
+}
+
+function launchDeliveryApp() {
+  // Proper Android launcher intent — no fallback URL so Chrome doesn't
+  // second-guess itself and redirect to the Play Store prematurely.
+  // The action + category combo targets the app's main launch activity.
+  window.location.href =
+    'intent://#Intent;' +
+    'action=android.intent.action.MAIN;' +
+    'category=android.intent.category.LAUNCHER;' +
+    'package=com.dominos.driver.app;' +
+    'end';
+}
+
+function saveWeekGoal(val) {
+  const n = parseFloat(val);
+  if (n > 0) localStorage.setItem('dtlog_weekgoal', n);
+  else localStorage.removeItem('dtlog_weekgoal');
+  renderWeeklySummary();
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+
+// Returns today's date as YYYY-MM-DD in LOCAL time (not UTC).
+// Using toISOString() would return UTC and show the wrong date
+// for anyone in a US timezone, especially late at night.
+function localDateStr(d) {
+  const dt = d || new Date();
+  return dt.getFullYear() + '-' +
+    String(dt.getMonth() + 1).padStart(2, '0') + '-' +
+    String(dt.getDate()).padStart(2, '0');
+}
+function fmtDate(s) {
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+function wIcon(w) {
+  return {Clear:'☀️',Cloudy:'🌥️',Rainy:'🌧️',Stormy:'⛈️',Snowy:'❄️',Icy:'🧊',Foggy:'🌫️',Hot:'🥵'}[w]||'🌡️';
+}
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + type;
+  clearTimeout(t._t); t._t = setTimeout(() => t.className = '', 3200);
+}
+
+// ══════════════════════════════════════════
+// PWA — MANIFEST + SERVICE WORKER
+// Injected dynamically so the whole app stays
+// as one self-contained HTML file.
+// ══════════════════════════════════════════
+(function setupPWA() {
+
+  // ── App icon (SVG, orange background, pizza slice) ──
+  const iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <rect width="512" height="512" rx="90" fill="#0d0f12"/>
+    <polygon points="256,70 60,430 452,430" fill="#f97316"/>
+    <polygon points="256,70 60,430 452,430" fill="url(#pg)" opacity="0.18"/>
+    <circle cx="220" cy="290" r="28" fill="#fbbf24"/>
+    <circle cx="300" cy="340" r="22" fill="#ef4444"/>
+    <circle cx="256" cy="220" r="18" fill="#ef4444"/>
+    <circle cx="170" cy="370" r="16" fill="#fbbf24"/>
+    <circle cx="330" cy="280" r="14" fill="#fbbf24"/>
+    <defs>
+      <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/>
+      </linearGradient>
+    </defs>
+    <text x="256" y="490" font-family="Arial Black,sans-serif" font-size="72"
+          font-weight="900" fill="#f97316" text-anchor="middle" letter-spacing="2">DL</text>
+  </svg>`;
+  const iconDataURI = 'data:image/svg+xml,' + encodeURIComponent(iconSVG);
+
+  // ── Inject manifest via data URI ──
+  const manifest = {
+    name: 'Delivery Log',
+    short_name: 'DeliveryLog',
+    description: 'Track your delivery shifts, tips, mileage and pay.',
+    start_url: './',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#0d0f12',
+    theme_color: '#f97316',
+    icons: [
+      { src: iconDataURI, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+      { src: iconDataURI, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+    ]
+  };
+  const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+  document.getElementById('pwa-manifest').href = URL.createObjectURL(manifestBlob);
+
+  // ── Register service worker (enables offline + install prompt) ──
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+const CACHE = 'delivery-log-v1';
+const ASSETS = ['/'];
+
+self.addEventListener('install', evt => {
+  evt.waitUntil(
+    caches.open(CACHE).then(c => {
+      // Cache what we can; ignore failures for cross-origin resources
+      return c.addAll(ASSETS).catch(() => {});
+    })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', evt => {
+  evt.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', evt => {
+  // Network-first: try live, fall back to cache
+  evt.respondWith(
+    fetch(evt.request)
+      .then(res => {
+        // Cache successful GET responses
+        if (evt.request.method === 'GET' && res.status === 200) {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(evt.request, copy));
+        }
+        return res;
+      })
+      .catch(() => caches.match(evt.request))
+  );
+});
+    `;
+    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+    const swURL  = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swURL, { scope: './' })
+      .catch(() => {}); // Silently ignore if blocked (e.g. file:// origin)
+  }
+
+})();
+</script>
+</body>
+</html>
