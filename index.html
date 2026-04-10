@@ -277,6 +277,32 @@
   .guide-text strong { color:var(--text); }
   .btn-close-about { display:block; width:100%; padding:14px; margin-top:6px; background:var(--orange); color:#000; font-family:var(--head); font-size:.95rem; font-weight:900; letter-spacing:2px; text-transform:uppercase; border:none; border-radius:0 0 16px 16px; cursor:pointer; }
 
+  /* ── EXPENSES ── */
+  .exp-entry { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:13px; margin-bottom:10px; }
+  .exp-header { display:flex; justify-content:space-between; align-items:flex-start; }
+  .exp-left { display:flex; flex-direction:column; gap:2px; }
+  .exp-cat  { font-size:.65rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--subtext); }
+  .exp-desc { font-weight:700; font-size:.95rem; color:var(--text); }
+  .exp-date { font-size:.68rem; color:var(--muted); font-family:var(--mono); margin-top:2px; }
+  .exp-amount { font-family:var(--mono); font-size:1.3rem; font-weight:bold; color:var(--red); white-space:nowrap; }
+  .exp-notes { font-size:.73rem; color:var(--subtext); margin-top:5px; font-style:italic; }
+
+  /* net income card in stats */
+  .net-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px; }
+  .net-card .nc-title { font-size:.6rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--subtext); margin-bottom:10px; }
+  .net-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; }
+  .net-row.total-row { border-top:1px solid var(--border); margin-top:4px; padding-top:10px; }
+  .net-label { font-size:.82rem; color:var(--subtext); }
+  .net-val   { font-family:var(--mono); font-size:1rem; font-weight:bold; }
+  .net-val.earned  { color:var(--green); }
+  .net-val.expense { color:var(--red); }
+  .net-val.profit  { font-size:1.25rem; }
+  .net-val.profit.pos { color:var(--teal); }
+  .net-val.profit.neg { color:var(--red); }
+
+  /* expense breakdown chart */
+  .exp-bar { background:linear-gradient(90deg,var(--red),#f87171); }
+
   ::-webkit-scrollbar { width:4px; }
   ::-webkit-scrollbar-track { background:var(--bg); }
   ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
@@ -305,6 +331,10 @@
       <div class="guide-item"><div class="guide-icon">💰</div><div class="guide-text"><strong>Tips Paid Out</strong> — The card tips the store paid out to you. <strong>Cash Tips</strong> is money handed to you directly by customers. Both are required — they're added together to calculate your total earned and hourly rate.</div></div>
       <div class="guide-item"><div class="guide-icon">🚗</div><div class="guide-text"><strong>Miles Driven</strong> — Optional. Log it if you want to track distance per shift.</div></div>
       <div class="guide-item"><div class="guide-icon">☁️</div><div class="guide-text"><strong>Weather &amp; Holiday</strong> — Tap to select conditions for the shift. Over time the Stats tab will show you which weather and days of the week earn the most tips.</div></div>
+
+      <div class="about-section-title">💸 Expenses</div>
+      <div class="guide-item"><div class="guide-icon">⛽</div><div class="guide-text">Log job-related expenses like gas, tires, oil changes, car washes, repairs, and more. Select a category, enter the amount and date, and optionally add a description and notes.</div></div>
+      <div class="guide-item"><div class="guide-icon">📊</div><div class="guide-text">The <strong>Stats</strong> tab shows a <strong>Net Income</strong> card that subtracts your expenses from your earnings so you can see what you actually take home. A bar chart breaks down spending by category.</div></div>
 
       <div class="about-section-title">💵 Paychecks</div>
       <div class="guide-item"><div class="guide-icon">📄</div><div class="guide-text">Log each paycheck with the amount and the date range it covers. The app will match it against shifts you've logged and calculate your <strong>base pay per hour</strong>, then combine it with tips to show your <strong>true total hourly rate</strong> in the Stats tab.</div></div>
@@ -346,6 +376,7 @@
   <button class="tab active" onclick="switchTab('log',this)">＋ Log</button>
   <button class="tab" onclick="switchTab('history',this)">History</button>
   <button class="tab" onclick="switchTab('pay',this)">💵 Pay</button>
+  <button class="tab" onclick="switchTab('expenses',this)">💸 Expenses</button>
   <button class="tab" onclick="switchTab('stats',this)">Stats</button>
   <button class="tab" onclick="switchTab('portal',this)">🚗 Drivosity</button>
 </div>
@@ -465,6 +496,55 @@
   <div id="check-list"></div>
 </div>
 
+<!-- ══ EXPENSES PANEL ══ -->
+<div class="panel" id="panel-expenses">
+  <div class="form-grid">
+    <div class="section-label">➕ Log an Expense</div>
+
+    <div class="field full">
+      <label>Category <span class="req">*</span></label>
+      <div class="toggle-group" id="exp-cat-group">
+        <button class="tog" data-val="⛽ Gas"        onclick="togCat(this)">⛽ Gas</button>
+        <button class="tog" data-val="🛞 Tires"      onclick="togCat(this)">🛞 Tires</button>
+        <button class="tog" data-val="🔧 Oil Change" onclick="togCat(this)">🔧 Oil Change</button>
+        <button class="tog" data-val="🚿 Car Wash"   onclick="togCat(this)">🚿 Car Wash</button>
+        <button class="tog" data-val="🔩 Repair"     onclick="togCat(this)">🔩 Repair</button>
+        <button class="tog" data-val="🛡️ Insurance"  onclick="togCat(this)">🛡️ Insurance</button>
+        <button class="tog" data-val="🅿️ Parking"    onclick="togCat(this)">🅿️ Parking</button>
+        <button class="tog" data-val="📦 Supplies"   onclick="togCat(this)">📦 Supplies</button>
+        <button class="tog" data-val="📋 Other"      onclick="togCat(this)">📋 Other</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Amount ($) <span class="req">*</span></label>
+      <input type="number" id="e-amount" step="0.01" min="0" placeholder="0.00">
+    </div>
+    <div class="field">
+      <label>Date <span class="req">*</span></label>
+      <input type="date" id="e-date">
+    </div>
+
+    <div class="field full">
+      <label>Description <span class="opt">(optional)</span></label>
+      <input type="text" id="e-desc" placeholder="e.g. Walmart oil change, Valvoline, BP…">
+    </div>
+    <div class="field full">
+      <label>Notes <span class="opt">(optional)</span></label>
+      <input type="text" id="e-notes" placeholder="Any extra details…">
+    </div>
+  </div>
+  <button class="btn-submit" style="background:var(--red);box-shadow:0 4px 20px rgba(239,68,68,.3)" onclick="saveExpense()">▶ SAVE EXPENSE</button>
+
+  <div class="section-label" style="margin-top:24px">📋 Expense History</div>
+  <div class="filter-bar" id="exp-filter-bar">
+    <button class="filter-btn active" onclick="setEF('all',this)">All</button>
+    <button class="filter-btn" onclick="setEF('week',this)">This Week</button>
+    <button class="filter-btn" onclick="setEF('month',this)">This Month</button>
+  </div>
+  <div id="exp-list"></div>
+</div>
+
 <!-- ══ STATS PANEL ══ -->
 <div class="panel" id="panel-stats">
   <div class="filter-bar">
@@ -481,11 +561,14 @@
     </div>
   </div>
   <div class="hourly-card" id="hourly-card"></div>
+  <div class="net-card" id="net-card"></div>
   <div class="stats-row" id="stat-cards"></div>
   <div class="section-label" style="margin:4px 0 10px">Avg Total Earned · Day of Week</div>
   <div class="chart-wrap" id="dow-chart"></div>
   <div class="section-label" style="margin:14px 0 10px">Avg Total Earned · Weather</div>
   <div class="chart-wrap" id="wx-chart"></div>
+  <div class="section-label" style="margin:14px 0 10px">Expenses by Category</div>
+  <div class="chart-wrap" id="exp-chart"></div>
 </div>
 
 <!-- ══ PORTAL PANEL ══ -->
@@ -539,12 +622,17 @@ const FILE_OPTS = { types:[{ description:'Delivery Data', accept:{'application/j
 // ══════════════════════════════════════════
 let entries    = [];
 let paychecks  = [];
-let fileHandle = null;   // File System Access API handle — lives for this session only
+let expenses   = [];
+let fileHandle = null;
 let weatherSel = null;
 let holidaySel = '';
 let hFilter    = 'all';
 let sFilter    = 'week';
 let editingId  = null;
+let timerInterval  = null;
+let timerStartTime = null;
+let catSel  = null;
+let eFilter = 'all';
 
 // ══════════════════════════════════════════
 // DATA MIGRATION
@@ -574,6 +662,7 @@ function migrateAll(raw) {
   result.entries   = (Array.isArray(raw.entries)   ? raw.entries   :
                       Array.isArray(raw)            ? raw           : []).map(migrateEntry);
   result.paychecks = Array.isArray(raw.paychecks)  ? raw.paychecks : [];
+  result.expenses  = Array.isArray(raw.expenses)   ? raw.expenses  : [];
   return result;
 }
 
@@ -587,7 +676,8 @@ function migrateAll(raw) {
   document.getElementById('f-date').value = today;
   document.getElementById('f-date').addEventListener('change', updateDOW);
   document.getElementById('hol-none').addEventListener('click', clearHoliday);
-  document.getElementById('p-end').value = today;
+  document.getElementById('p-end').value  = today;
+  document.getElementById('e-date').value = today;
 
   // Show relink banner if data exists but no file handle yet this session
   if (entries.length > 0 || paychecks.length > 0) {
@@ -596,10 +686,13 @@ function migrateAll(raw) {
 
   updateDOW(); setNowTime(); tickClock(); setInterval(tickClock, 30000);
 
+  // Restore any in-progress timer AFTER form fields are initialized
+  restoreTimer();
+
   const savedGoal = localStorage.getItem('dtlog_weekgoal');
   if (savedGoal) document.getElementById('weekGoalInput').value = savedGoal;
 
-  renderHistory(); renderPaychecks(); renderStats();
+  renderHistory(); renderPaychecks(); renderExpenses(); renderStats();
 })();
 
 function loadFromLS() {
@@ -629,8 +722,9 @@ function loadFromLS() {
     if (bestRaw && bestCount > 0) {
       entries   = bestRaw.entries;
       paychecks = bestRaw.paychecks;
+      expenses  = bestRaw.expenses || [];
     } else {
-      entries = []; paychecks = [];
+      entries = []; paychecks = []; expenses = [];
     }
 
     // Consolidate under current key
@@ -639,7 +733,7 @@ function loadFromLS() {
 }
 
 function saveToLS() {
-  localStorage.setItem(LS, JSON.stringify({ entries, paychecks }));
+  localStorage.setItem(LS, JSON.stringify({ entries, paychecks, expenses }));
 }
 
 function tickClock() {
@@ -689,7 +783,7 @@ async function writeFile() {
   if (!fileHandle) return false;
   try {
     const w = await fileHandle.createWritable();
-    await w.write(JSON.stringify({ entries, paychecks }, null, 2));
+    await w.write(JSON.stringify({ entries, paychecks, expenses }, null, 2));
     await w.close();
     setSaveStatus(true, fileHandle.name);
     return true;
@@ -725,6 +819,7 @@ async function relinkFile() {
         // Do NOT merge; LS and file hold the same data so merging doubles everything.
         entries   = mig.entries;
         paychecks = mig.paychecks;
+        expenses  = mig.expenses || [];
         saveToLS();
         toast('Relinked — ' + entries.length + ' shifts loaded', 'ok');
       } catch { toast('Could not read file','warn'); }
@@ -735,7 +830,7 @@ async function relinkFile() {
     localStorage.setItem('dtlog_hasFile', '1');
     document.getElementById('relinkBanner').classList.add('hidden');
     setSaveStatus(true, fh.name);
-    renderHistory(); renderPaychecks(); renderStats();
+    renderHistory(); renderPaychecks(); renderExpenses(); renderStats();
   } catch(e) { if (e.name !== 'AbortError') toast('Could not open file','err'); }
 }
 
@@ -942,89 +1037,131 @@ function calcHourly(periodEntries) {
 // ══════════════════════════════════════════
 // SHIFT TIMER
 // ══════════════════════════════════════════
-let timerInterval  = null;
-let timerStartTime = null;   // Date object when shift started
-
-// Restore timer state if app was closed mid-shift
-(function restoreTimer() {
-  const saved = localStorage.getItem('dtlog_timer');
-  if (!saved) return;
-  try {
-    const { startTs } = JSON.parse(saved);
-    timerStartTime = new Date(startTs);
-    startTimerTick();
-  } catch { localStorage.removeItem('dtlog_timer'); }
-})();
-
+// ══════════════════════════════════════════
+// SHIFT TIMER
+// ══════════════════════════════════════════
 function timerStart() {
-  if (timerInterval) return;
+  // Already running — do nothing
+  if (timerStartTime) return;
+
   timerStartTime = new Date();
-  // Set start time field
+
+  // Fill in date and start time fields immediately
   document.getElementById('f-date').value  = localDateStr(timerStartTime);
   updateDOW();
   document.getElementById('f-start').value =
     String(timerStartTime.getHours()).padStart(2,'0') + ':' +
     String(timerStartTime.getMinutes()).padStart(2,'0');
-  // Save to localStorage so timer survives app close
+
+  // Persist start time so it survives app close
   localStorage.setItem('dtlog_timer', JSON.stringify({ startTs: timerStartTime.toISOString() }));
-  startTimerTick();
+
+  setTimerUI('running');
+  startTick();
   toast('Shift started — timer running', 'ok');
 }
 
-function startTimerTick() {
-  const block   = document.getElementById('timerBlock');
-  const display = document.getElementById('timerDisplay');
-  const status  = document.getElementById('timerStatus');
-  block.classList.add('running');
-  display.classList.add('running');
-  document.getElementById('timerBtnsIdle').classList.add('hidden');
-  document.getElementById('timerBtnsRunning').classList.remove('hidden');
-
-  timerInterval = setInterval(() => {
-    const elapsed = Math.floor((Date.now() - timerStartTime) / 1000);
-    const h = String(Math.floor(elapsed / 3600)).padStart(2,'0');
-    const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2,'0');
-    const s = String(elapsed % 60).padStart(2,'0');
-    display.textContent = `${h}:${m}:${s}`;
-    status.textContent  = 'Running';
-  }, 1000);
-}
-
 function timerEnd() {
-  if (!timerInterval) return;
-  clearInterval(timerInterval); timerInterval = null;
-  localStorage.removeItem('dtlog_timer');
+  if (!timerStartTime) return;
 
+  // Fill in end time
   const now = new Date();
   document.getElementById('f-end').value =
     String(now.getHours()).padStart(2,'0') + ':' +
     String(now.getMinutes()).padStart(2,'0');
 
-  // Reset UI but keep the elapsed time visible
-  document.getElementById('timerBlock').classList.remove('running');
-  document.getElementById('timerDisplay').classList.remove('running');
-  document.getElementById('timerStatus').textContent = 'Ended — fill in earnings below';
-  document.getElementById('timerBtnsRunning').classList.add('hidden');
-  document.getElementById('timerBtnsIdle').classList.remove('hidden');
-  document.querySelector('.btn-timer-start').textContent = '▶ New Shift';
+  stopTick();
   timerStartTime = null;
-  toast('Shift ended — start & end times filled in', 'ok');
+  localStorage.removeItem('dtlog_timer');
+  setTimerUI('ended');
+  toast('Shift ended — fill in your earnings and save', 'ok');
 }
 
 function timerCancel() {
   if (!confirm('Cancel the running timer? Start time will be cleared.')) return;
-  clearInterval(timerInterval); timerInterval = null;
+  stopTick();
   timerStartTime = null;
   localStorage.removeItem('dtlog_timer');
-  document.getElementById('timerBlock').classList.remove('running');
-  document.getElementById('timerDisplay').classList.remove('running');
-  document.getElementById('timerDisplay').textContent = '00:00:00';
-  document.getElementById('timerStatus').textContent  = 'Not started';
-  document.getElementById('timerBtnsRunning').classList.add('hidden');
-  document.getElementById('timerBtnsIdle').classList.remove('hidden');
-  document.querySelector('.btn-timer-start').textContent = '▶ Start Shift';
   document.getElementById('f-start').value = '';
   document.getElementById('f-end').value   = '';
+  setTimerUI('idle');
+}
+
+function startTick() {
+  // Tick once immediately, then every second
+  function tick() {
+    if (!timerStartTime) { stopTick(); return; }
+    const elapsed = Math.floor((Date.now() - timerStartTime.getTime()) / 1000);
+    const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+    const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+    const s = String(elapsed % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').textContent = `${h}:${m}:${s}`;
+  }
+  tick();
+  timerInterval = setInterval(tick, 1000);
+}
+
+function stopTick() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  document.getElementById('timerDisplay').textContent = '00:00:00';
+}
+
+function setTimerUI(state) {
+  const block   = document.getElementById('timerBlock');
+  const display = document.getElementById('timerDisplay');
+  const status  = document.getElementById('timerStatus');
+  const btnIdle = document.getElementById('timerBtnsIdle');
+  const btnRun  = document.getElementById('timerBtnsRunning');
+  const startBtn = document.querySelector('.btn-timer-start');
+
+  if (state === 'running') {
+    block.classList.add('running');
+    display.classList.add('running');
+    status.textContent = 'Running';
+    btnIdle.classList.add('hidden');
+    btnRun.classList.remove('hidden');
+    startBtn.textContent = '▶ Start Shift';
+  } else if (state === 'ended') {
+    block.classList.remove('running');
+    display.classList.remove('running');
+    status.textContent = 'Ended — fill in earnings below ↓';
+    btnIdle.classList.remove('hidden');
+    btnRun.classList.add('hidden');
+    startBtn.textContent = '▶ New Shift';
+  } else { // idle
+    block.classList.remove('running');
+    display.classList.remove('running');
+    display.textContent = '00:00:00';
+    status.textContent = 'Not started';
+    btnIdle.classList.remove('hidden');
+    btnRun.classList.add('hidden');
+    startBtn.textContent = '▶ Start Shift';
+  }
+}
+
+// Restore timer if app was closed mid-shift
+function restoreTimer() {
+  const saved = localStorage.getItem('dtlog_timer');
+  if (!saved) return;
+  try {
+    const { startTs } = JSON.parse(saved);
+    const start = new Date(startTs);
+    // Discard if more than 20 hours old — definitely stale
+    if (isNaN(start.getTime()) || Date.now() - start.getTime() > 72000000) {
+      localStorage.removeItem('dtlog_timer');
+      return;
+    }
+    timerStartTime = start;
+    document.getElementById('f-date').value  = localDateStr(timerStartTime);
+    updateDOW();
+    document.getElementById('f-start').value =
+      String(timerStartTime.getHours()).padStart(2,'0') + ':' +
+      String(timerStartTime.getMinutes()).padStart(2,'0');
+    setTimerUI('running');
+    startTick();
+  } catch {
+    localStorage.removeItem('dtlog_timer');
+  }
 }
 
 // ══════════════════════════════════════════
@@ -1200,7 +1337,11 @@ function renderStats() {
 
   if (!data.length) {
     hc.innerHTML = `<div class="hc-title">⏱ Hourly Breakdown</div><p style="color:var(--muted);font-size:.8rem">No shifts in this period.</p>`;
-    cards.innerHTML = ''; document.getElementById('dow-chart').innerHTML = ''; document.getElementById('wx-chart').innerHTML = '';
+    cards.innerHTML = '';
+    document.getElementById('net-card').innerHTML = '';
+    document.getElementById('dow-chart').innerHTML = '';
+    document.getElementById('wx-chart').innerHTML = '';
+    document.getElementById('exp-chart').innerHTML = '';
     return;
   }
 
@@ -1288,6 +1429,46 @@ function renderStats() {
           <span>$${avg.toFixed(0)}</span>
         </div></div></div>`; }).join('')
     : '<p style="color:var(--muted);font-size:.75rem;padding:8px 0">No weather data yet.</p>';
+
+  // ── Net Income Card ──
+  const expInPeriod = filteredExpenses(sFilter);
+  const totExpenses = expInPeriod.reduce((s, x) => s + x.amount, 0);
+  const netIncome   = totEarned - totExpenses;
+  const nc = document.getElementById('net-card');
+  nc.innerHTML = `
+    <div class="nc-title">💰 Income vs Expenses</div>
+    <div class="net-row">
+      <span class="net-label">Total Earned</span>
+      <span class="net-val earned">+$${totEarned.toFixed(2)}</span>
+    </div>
+    <div class="net-row">
+      <span class="net-label">Total Expenses</span>
+      <span class="net-val expense">-$${totExpenses.toFixed(2)}</span>
+    </div>
+    <div class="net-row total-row">
+      <span class="net-label" style="font-weight:700;color:var(--text)">Net Income</span>
+      <span class="net-val profit ${netIncome >= 0 ? 'pos' : 'neg'}">${netIncome >= 0 ? '+' : ''}$${netIncome.toFixed(2)}</span>
+    </div>`;
+
+  // ── Expense category chart ──
+  const catMap = {};
+  expInPeriod.forEach(x => {
+    if (!catMap[x.cat]) catMap[x.cat] = 0;
+    catMap[x.cat] += x.amount;
+  });
+  const catEntries = Object.entries(catMap).sort((a,b) => b[1] - a[1]);
+  const mxExp = Math.max(...catEntries.map(([,v]) => v), 1);
+  document.getElementById('exp-chart').innerHTML = catEntries.length
+    ? catEntries.map(([cat, total]) => `
+        <div class="chart-row">
+          <span class="chart-label" style="width:52px;font-size:.58rem;white-space:nowrap;overflow:hidden">${cat.split(' ')[0]}</span>
+          <div class="chart-bar-bg">
+            <div class="chart-bar exp-bar" style="width:${(total/mxExp*100).toFixed(1)}%">
+              <span>$${total.toFixed(0)}</span>
+            </div>
+          </div>
+        </div>`).join('')
+    : '<p style="color:var(--muted);font-size:.75rem;padding:8px 0">No expenses in this period.</p>';
 }
 
 // ══════════════════════════════════════════
@@ -1329,15 +1510,105 @@ function handleImport(evt) {
       // Merge: keep local entries not in the file
       const impEIds = new Set(mig.entries.map(x => x.id));
       const impCIds = new Set(mig.paychecks.map(x => x.id));
+      const impXIds = new Set((mig.expenses||[]).map(x => x.id));
       entries   = [...mig.entries,   ...entries.filter(x => !impEIds.has(x.id))].sort((a,b) => b.id-a.id);
       paychecks = [...mig.paychecks, ...paychecks.filter(x => !impCIds.has(x.id))].sort((a,b) => b.id-a.id);
+      expenses  = [...(mig.expenses||[]), ...expenses.filter(x => !impXIds.has(x.id))].sort((a,b) => b.id-a.id);
       await persist();
-      renderHistory(); renderPaychecks(); renderStats();
-      toast('Imported ' + mig.entries.length + ' shifts, ' + mig.paychecks.length + ' paychecks', 'ok');
+      renderHistory(); renderPaychecks(); renderExpenses(); renderStats();
+      toast('Imported ' + mig.entries.length + ' shifts, ' + mig.paychecks.length + ' paychecks, ' + (mig.expenses||[]).length + ' expenses', 'ok');
     } catch { toast('Could not read file — make sure it is a valid JSON backup', 'err'); }
     evt.target.value = ''; // reset so same file can be re-imported if needed
   };
   reader.readAsText(file);
+}
+
+// ══════════════════════════════════════════
+// EXPENSES
+// ══════════════════════════════════════════
+function togCat(btn) {
+  document.querySelectorAll('#exp-cat-group .tog').forEach(b => b.classList.remove('active'));
+  catSel = (catSel === btn.dataset.val) ? null : (btn.classList.add('active'), btn.dataset.val);
+}
+
+function setEF(f, btn) {
+  eFilter = f;
+  document.querySelectorAll('#exp-filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderExpenses();
+}
+
+async function saveExpense() {
+  const amount = parseFloat(document.getElementById('e-amount').value);
+  const date   = document.getElementById('e-date').value;
+  if (!catSel)           { toast('Select a category', 'err'); return; }
+  if (isNaN(amount) || amount <= 0) { toast('Enter an amount', 'err'); return; }
+  if (!date)             { toast('Enter a date', 'err'); return; }
+
+  const desc  = document.getElementById('e-desc').value.trim();
+  const notes = document.getElementById('e-notes').value.trim();
+
+  expenses.unshift({ id: Date.now(), cat: catSel, amount, date, desc, notes });
+  await persist();
+
+  // Reset form
+  document.getElementById('e-amount').value = '';
+  document.getElementById('e-desc').value   = '';
+  document.getElementById('e-notes').value  = '';
+  catSel = null;
+  document.querySelectorAll('#exp-cat-group .tog').forEach(b => b.classList.remove('active'));
+
+  renderExpenses();
+  renderStats();
+}
+
+async function delExpense(id) {
+  if (!confirm('Delete this expense?')) return;
+  expenses = expenses.filter(e => e.id !== id);
+  await persist();
+  renderExpenses();
+  renderStats();
+}
+
+function filteredExpenses(p) {
+  const now = new Date(); now.setHours(0,0,0,0);
+  return expenses.filter(e => {
+    if (p === 'all') return true;
+    const d = new Date(e.date + 'T00:00:00');
+    if (p === 'week') {
+      const ws = new Date(now);
+      const day = now.getDay();
+      ws.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+      return d >= ws;
+    }
+    if (p === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    return true;
+  });
+}
+
+function renderExpenses() {
+  const list = document.getElementById('exp-list');
+  if (!list) return;
+  const data = filteredExpenses(eFilter);
+  if (!data.length) {
+    list.innerHTML = `<div class="empty"><div class="e-icon">💸</div><p>No expenses logged yet.</p></div>`;
+    return;
+  }
+  list.innerHTML = data.map(e => `
+    <div class="exp-entry">
+      <div class="exp-header">
+        <div class="exp-left">
+          <span class="exp-cat">${e.cat}</span>
+          <span class="exp-desc">${e.desc || e.cat}</span>
+          <span class="exp-date">${fmtDate(e.date)}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="exp-amount">-$${e.amount.toFixed(2)}</span>
+          <button class="btn-act del" onclick="delExpense(${e.id})">DEL</button>
+        </div>
+      </div>
+      ${e.notes ? `<div class="exp-notes">📝 ${e.notes}</div>` : ''}
+    </div>`).join('');
 }
 
 // ══════════════════════════════════════════
