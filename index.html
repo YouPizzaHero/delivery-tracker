@@ -57,9 +57,8 @@
   .btn-relink { padding:8px 16px; background:var(--blue); color:#000; border:none; border-radius:6px; font-family:var(--head); font-size:.8rem; font-weight:900; letter-spacing:1px; text-transform:uppercase; cursor:pointer; white-space:nowrap; flex-shrink:0; }
 
   /* ── TABS ── */
-  .tabs { display:flex; background:var(--panel); border-bottom:2px solid var(--border); overflow-x:auto; }
-  .tabs::-webkit-scrollbar { display:none; }
-  .tab  { flex:1; min-width:0; padding:12px 4px; text-align:center; font-size:.78rem; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--muted); cursor:pointer; border:none; background:none; border-bottom:3px solid transparent; transition:all .2s; white-space:nowrap; }
+  .tabs { display:flex; background:var(--panel); border-bottom:2px solid var(--border); }
+  .tab  { flex:1; padding:11px 2px; text-align:center; font-size:.72rem; font-weight:700; letter-spacing:0; text-transform:uppercase; color:var(--muted); cursor:pointer; border:none; background:none; border-bottom:3px solid transparent; transition:all .2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .tab.active { color:var(--orange); border-bottom-color:var(--orange); }
 
   /* ── PANELS ── */
@@ -350,9 +349,9 @@
   <button class="tab active" onclick="switchTab('log',this)">＋ Log</button>
   <button class="tab" onclick="switchTab('history',this)">History</button>
   <button class="tab" onclick="switchTab('pay',this)">💵 Pay</button>
-  <button class="tab" onclick="switchTab('expenses',this)">💸 Expenses</button>
+  <button class="tab" onclick="switchTab('expenses',this)">💸 Exp</button>
   <button class="tab" onclick="switchTab('stats',this)">Stats</button>
-  <button class="tab" onclick="switchTab('portal',this)">🚗 Drivosity</button>
+  <button class="tab" onclick="switchTab('portal',this)">🚗 Drive</button>
 </div>
 
 <!-- ══ LOG / EDIT PANEL ══ -->
@@ -527,9 +526,9 @@
     <button class="filter-btn" onclick="setSF('all',this)">All Time</button>
   </div>
   <!-- Weekly goal setter -->
-  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
-    <div style="flex:1;display:flex;flex-direction:column;gap:4px">
-      <label style="font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--subtext)">Weekly Earnings Goal ($)</label>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+      <label style="font-size:.76rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--subtext)">Weekly Earnings Goal ($)</label>
       <input type="number" id="weekGoalInput" step="1" min="0" placeholder="e.g. 400" style="font-family:var(--mono)"
         value="" oninput="saveWeekGoal(this.value)">
     </div>
@@ -537,12 +536,13 @@
   <div class="hourly-card" id="hourly-card"></div>
   <div class="net-card" id="net-card"></div>
   <div class="stats-row" id="stat-cards"></div>
-  <div class="section-label" style="margin:4px 0 10px">Avg Total Earned · Day of Week</div>
+  <div class="section-label" style="margin:20px 0 12px">Avg Tips · Day of Week</div>
   <div class="chart-wrap" id="dow-chart"></div>
-  <div class="section-label" style="margin:14px 0 10px">Avg Total Earned · Weather</div>
+  <div class="section-label" style="margin:20px 0 12px">Avg Tips · Weather</div>
   <div class="chart-wrap" id="wx-chart"></div>
-  <div class="section-label" style="margin:14px 0 10px">Expenses by Category</div>
+  <div class="section-label" style="margin:20px 0 12px">Expenses by Category</div>
   <div class="chart-wrap" id="exp-chart"></div>
+  <div style="height:20px"></div>
 </div>
 
 <!-- ══ PORTAL PANEL ══ -->
