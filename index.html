@@ -200,20 +200,6 @@
   .ps-label { font-size:.78rem; color:var(--subtext); }
   .ps-val   { font-family:var(--mono); font-size:.82rem; color:var(--text); }
 
-  /* ── SHIFT TIMER ── */
-  .timer-block { background:var(--panel2); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:14px; display:flex; flex-direction:column; gap:10px; }
-  .timer-block.running { border-color:var(--green); background:rgba(34,197,94,.06); }
-  .timer-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-  .timer-label { font-size:.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--subtext); }
-  .timer-display { font-family:var(--mono); font-size:2rem; font-weight:bold; color:var(--text); letter-spacing:4px; text-align:center; padding:4px 0; }
-  .timer-display.running { color:var(--green); text-shadow:0 0 16px rgba(34,197,94,.4); }
-  .timer-btns { display:flex; gap:8px; }
-  .btn-timer-start { flex:1; padding:13px; border:none; border-radius:8px; background:var(--green); color:#000; font-family:var(--head); font-size:.95rem; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; transition:background .2s,transform .1s; }
-  .btn-timer-start:active { transform:scale(.98); }
-  .btn-timer-end { flex:1; padding:13px; border:none; border-radius:8px; background:var(--orange); color:#000; font-family:var(--head); font-size:.95rem; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; transition:background .2s,transform .1s; }
-  .btn-timer-end:active { transform:scale(.98); }
-  .btn-timer-cancel { padding:13px 16px; border:1px solid var(--border); border-radius:8px; background:none; color:var(--subtext); font-family:var(--head); font-size:.9rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
-
   /* ── WEEKLY SUMMARY BANNER ── */
   .week-summary { background:linear-gradient(135deg,#0e1a10,#0d1422); border:1px solid var(--border); border-left:3px solid var(--green); border-radius:10px; padding:14px 16px; margin-bottom:14px; }
   .ws-title { font-size:.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--green); margin-bottom:10px; }
@@ -300,7 +286,7 @@
     <div class="about-body">
 
       <div class="about-section-title">📋 Logging a Shift</div>
-      <div class="guide-item"><div class="guide-icon">⏱</div><div class="guide-text"><strong>Shift Timer</strong> — Tap Start Shift when you clock in. It stamps your start time automatically. Tap End Shift when you're done to fill in the end time. Then enter your earnings and hit Save.</div></div>
+      <div class="guide-item"><div class="guide-icon">⏱</div><div class="guide-text"><strong>Hours Worked</strong> — Enter the total hours you worked for that shift. You can use decimals — for example, 4.5 for four and a half hours, or 0.25 increments if you want to be precise.</div></div>
       <div class="guide-item"><div class="guide-icon">💰</div><div class="guide-text"><strong>Tips Paid Out</strong> — The card tips the store paid out to you. <strong>Cash Tips</strong> is money handed to you directly by customers. Both are required — they're added together to calculate your total earned and hourly rate.</div></div>
       <div class="guide-item"><div class="guide-icon">🚗</div><div class="guide-text"><strong>Miles Driven</strong> — Optional. Log it if you want to track distance per shift.</div></div>
       <div class="guide-item"><div class="guide-icon">☁️</div><div class="guide-text"><strong>Weather &amp; Holiday</strong> — Tap to select conditions for the shift. Over time the Stats tab will show you which weather and days of the week earn the most tips.</div></div>
@@ -363,28 +349,11 @@
     <button class="btn-cancel-edit" onclick="cancelEdit()">✕ Cancel</button>
   </div>
 
-  <!-- Shift Timer -->
-  <div class="timer-block" id="timerBlock">
-    <div class="timer-row">
-      <span class="timer-label">⏱ Shift Timer</span>
-      <span class="timer-label" id="timerStatus">Not started</span>
-    </div>
-    <div class="timer-display" id="timerDisplay">00:00:00</div>
-    <div class="timer-btns" id="timerBtnsIdle">
-      <button class="btn-timer-start" onclick="timerStart()">▶ Start Shift</button>
-    </div>
-    <div class="timer-btns hidden" id="timerBtnsRunning">
-      <button class="btn-timer-end" onclick="timerEnd()">■ End Shift</button>
-      <button class="btn-timer-cancel" onclick="timerCancel()">✕</button>
-    </div>
-  </div>
-
   <div class="form-grid">
     <div class="section-label">📅 Shift Info</div>
     <div class="field full"><label>Date <span class="req">*</span></label><input type="date" id="f-date"></div>
     <div class="field full"><label>Day of Week</label><input type="text" id="f-dow" readonly style="color:var(--amber)"></div>
-    <div class="field"><label>Start Time <span class="req">*</span></label><input type="time" id="f-start"></div>
-    <div class="field"><label>End Time <span class="req">*</span></label><input type="time" id="f-end"></div>
+    <div class="field full"><label>Hours Worked <span class="req">*</span></label><input type="number" id="f-hours" step="any" min="0" placeholder="e.g. 8.41"></div>
 
     <div class="section-label">💰 Earnings</div>
     <div class="field">
@@ -603,10 +572,8 @@ let holidaySel = '';
 let hFilter    = 'all';
 let sFilter    = 'week';
 let editingId  = null;
-let timerInterval  = null;
-let timerStartTime = null;
-let catSel  = null;
-let eFilter = 'all';
+let catSel     = null;
+let eFilter    = 'all';
 
 // ══════════════════════════════════════════
 // DATA MIGRATION
@@ -615,26 +582,35 @@ let eFilter = 'all';
 // New field `totalTips = tipsPaid + cash` drives all calcs.
 // ══════════════════════════════════════════
 function migrateEntry(e) {
+  if (!e || typeof e !== 'object') return e;
   if (e.tipsPaid === undefined) {
     e.tipsPaid = e.tips !== undefined ? e.tips : 0;
   }
-  if (e.cash === undefined) e.cash = 0;
+  if (e.cash  === undefined) e.cash  = 0;
   if (e.miles === undefined) e.miles = null;
-  // Guard hours — old entries missing this produce NaN throughout stats
-  if (!e.hours || isNaN(e.hours)) {
-    if (e.start && e.end) {
-      const [sh,sm] = e.start.split(':').map(Number);
-      const [eh,em] = e.end.split(':').map(Number);
-      let mins = (eh*60+em) - (sh*60+sm);
-      if (mins < 0) mins += 1440;
-      e.hours = +(mins/60).toFixed(2);
+  // Recalculate hours from start/end only if hours is missing AND
+  // start and end are both non-empty strings (old-format entries).
+  // New entries (post timer removal) have hours set directly — skip.
+  if (!e.hours || isNaN(parseFloat(e.hours))) {
+    if (typeof e.start === 'string' && e.start.includes(':') &&
+        typeof e.end   === 'string' && e.end.includes(':')) {
+      try {
+        const [sh,sm] = e.start.split(':').map(Number);
+        const [eh,em] = e.end.split(':').map(Number);
+        let mins = (eh*60+em) - (sh*60+sm);
+        if (mins < 0) mins += 1440;
+        e.hours = +(mins/60).toFixed(2);
+      } catch { e.hours = 0; }
     } else {
       e.hours = 0;
     }
   }
-  e.totalTips = +(e.tipsPaid + e.cash).toFixed(2);
-  e.tph  = e.hours > 0 ? +(e.totalTips / e.hours).toFixed(2) : 0;
-  e.tpr  = (e.runs||0) > 0 ? +(e.totalTips / e.runs).toFixed(2) : 0;
+  e.hours = parseFloat(e.hours) || 0;
+  e.tipsPaid   = parseFloat(e.tipsPaid)   || 0;
+  e.cash       = parseFloat(e.cash)       || 0;
+  e.totalTips  = +(e.tipsPaid + e.cash).toFixed(2);
+  e.tph = e.hours > 0 ? +(e.totalTips / e.hours).toFixed(2) : 0;
+  e.tpr = (e.runs||0) > 0 ? +(e.totalTips / (e.runs||0)).toFixed(2) : 0;
   return e;
 }
 
@@ -665,10 +641,7 @@ function migrateAll(raw) {
     document.getElementById('relinkBanner').classList.remove('hidden');
   }
 
-  updateDOW(); setNowTime(); tickClock(); setInterval(tickClock, 30000);
-
-  // Restore any in-progress timer AFTER form fields are initialized
-  restoreTimer();
+  updateDOW(); tickClock(); setInterval(tickClock, 30000);
 
   const savedGoal = localStorage.getItem('dtlog_weekgoal');
   if (savedGoal) document.getElementById('weekGoalInput').value = savedGoal;
@@ -720,11 +693,6 @@ function saveToLS() {
 function tickClock() {
   document.getElementById('headerMeta').textContent =
     new Date().toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-}
-function setNowTime() {
-  const n = new Date();
-  document.getElementById('f-start').value =
-    String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
 }
 function updateDOW() {
   const v = document.getElementById('f-date').value; if (!v) return;
@@ -835,14 +803,13 @@ function clearHoliday() {
 // SAVE / UPDATE SHIFT
 // ══════════════════════════════════════════
 async function saveEntry() {
-  const date  = document.getElementById('f-date').value;
-  const start = document.getElementById('f-start').value;
-  const end   = document.getElementById('f-end').value;
+  const date     = document.getElementById('f-date').value;
   const tipsPaid = parseFloat(document.getElementById('f-tips').value);
   const cash     = parseFloat(document.getElementById('f-cash').value);
+  const hours    = parseFloat(document.getElementById('f-hours').value);
 
-  if (!date || !start || !end || isNaN(tipsPaid) || isNaN(cash)) {
-    toast('Fill in Date, Times, Tips Paid Out & Cash Tips', 'err'); return;
+  if (!date || isNaN(tipsPaid) || isNaN(cash) || isNaN(hours) || hours <= 0) {
+    toast('Fill in Date, Hours Worked, Tips Paid Out & Cash Tips', 'err'); return;
   }
 
   const milesRaw = document.getElementById('f-miles').value;
@@ -850,15 +817,10 @@ async function saveEntry() {
   const runs     = parseInt(document.getElementById('f-runs').value) || 0;
   const notes    = document.getElementById('f-notes').value.trim();
   const dow      = document.getElementById('f-dow').value;
-
-  const [sh,sm] = start.split(':').map(Number), [eh,em] = end.split(':').map(Number);
-  let mins = (eh*60+em) - (sh*60+sm); if (mins < 0) mins += 1440;
-  const hours    = +(mins / 60).toFixed(2);
-  const tod      = sh>=5&&sh<12?'Morning':sh>=12&&sh<17?'Afternoon':sh>=17&&sh<21?'Evening':'Night';
   const totalTips = +(tipsPaid + cash).toFixed(2);
 
   const entryData = {
-    date, dow, start, end, hours, tod,
+    date, dow, hours: +hours.toFixed(2),
     tipsPaid, cash, totalTips, miles, runs,
     weather:  weatherSel || null,
     holiday:  holidaySel || null,
@@ -886,7 +848,7 @@ async function saveEntry() {
 }
 
 function resetForm() {
-  ['f-tips','f-cash','f-miles','f-runs','f-notes','f-end'].forEach(id => {
+  ['f-hours','f-tips','f-cash','f-miles','f-runs','f-notes'].forEach(id => {
     document.getElementById(id).value = '';
   });
   weatherSel = null;
@@ -906,8 +868,7 @@ function editEntry(id) {
   // Fill form
   document.getElementById('f-date').value  = e.date;
   updateDOW();
-  document.getElementById('f-start').value = e.start;
-  document.getElementById('f-end').value   = e.end;
+  document.getElementById('f-hours').value = e.hours;
   document.getElementById('f-tips').value  = e.tipsPaid;
   document.getElementById('f-cash').value  = e.cash;
   document.getElementById('f-miles').value = e.miles !== null ? e.miles : '';
@@ -946,10 +907,8 @@ function cancelEdit() {
   document.getElementById('submitBtn').textContent = '▶ SAVE SHIFT';
   document.getElementById('submitBtn').classList.remove('edit-mode');
   resetForm();
-  // Reset date/time to today
-  const today = localDateStr();
-  document.getElementById('f-date').value = today;
-  updateDOW(); setNowTime();
+  document.getElementById('f-date').value = localDateStr();
+  updateDOW();
 }
 
 // ══════════════════════════════════════════
@@ -992,7 +951,7 @@ async function delPaycheck(id) {
 // ══════════════════════════════════════════
 function calcHourly(periodEntries) {
   const totEarned = periodEntries.reduce((s,e) => s + e.totalTips, 0);
-  const totHours  = periodEntries.reduce((s,e) => s + e.hours, 0);
+  const totHours  = periodEntries.reduce((s,e) => s + (parseFloat(e.hours)||0), 0);
   const earnedPH  = totHours > 0 ? totEarned / totHours : 0;
 
   if (!paychecks.length) return { earnedPH, basePerHour:0, totalPerHour:earnedPH, hasPaychecks:false };
@@ -1002,10 +961,10 @@ function calcHourly(periodEntries) {
 
   paychecks.forEach(ck => {
     const shiftsInCheck  = entries.filter(e => e.date >= ck.start && e.date <= ck.end);
-    const hoursInCheck   = shiftsInCheck.reduce((s,e) => s + e.hours, 0);
+    const hoursInCheck   = shiftsInCheck.reduce((s,e) => s + (parseFloat(e.hours)||0), 0);
     if (!hoursInCheck) return;
     const shiftsInPeriod = shiftsInCheck.filter(e => periodDates.has(e.date));
-    const hoursInPeriod  = shiftsInPeriod.reduce((s,e) => s + e.hours, 0);
+    const hoursInPeriod  = shiftsInPeriod.reduce((s,e) => s + (parseFloat(e.hours)||0), 0);
     if (!hoursInPeriod) return;
     totalBaseWages += (hoursInPeriod / hoursInCheck) * ck.amount;
   });
@@ -1015,135 +974,6 @@ function calcHourly(periodEntries) {
   return { earnedPH, basePerHour, totalPerHour, hasPaychecks: true, totalBaseWages };
 }
 
-// ══════════════════════════════════════════
-// SHIFT TIMER
-// ══════════════════════════════════════════
-// ══════════════════════════════════════════
-// SHIFT TIMER
-// ══════════════════════════════════════════
-function timerStart() {
-  // Already running — do nothing
-  if (timerStartTime) return;
-
-  timerStartTime = new Date();
-
-  // Fill in date and start time fields immediately
-  document.getElementById('f-date').value  = localDateStr(timerStartTime);
-  updateDOW();
-  document.getElementById('f-start').value =
-    String(timerStartTime.getHours()).padStart(2,'0') + ':' +
-    String(timerStartTime.getMinutes()).padStart(2,'0');
-
-  // Persist start time so it survives app close
-  localStorage.setItem('dtlog_timer', JSON.stringify({ startTs: timerStartTime.toISOString() }));
-
-  setTimerUI('running');
-  startTick();
-  toast('Shift started — timer running', 'ok');
-}
-
-function timerEnd() {
-  if (!timerStartTime) return;
-
-  // Fill in end time
-  const now = new Date();
-  document.getElementById('f-end').value =
-    String(now.getHours()).padStart(2,'0') + ':' +
-    String(now.getMinutes()).padStart(2,'0');
-
-  stopTick();
-  timerStartTime = null;
-  localStorage.removeItem('dtlog_timer');
-  setTimerUI('ended');
-  toast('Shift ended — fill in your earnings and save', 'ok');
-}
-
-function timerCancel() {
-  if (!confirm('Cancel the running timer? Start time will be cleared.')) return;
-  stopTick();
-  timerStartTime = null;
-  localStorage.removeItem('dtlog_timer');
-  document.getElementById('f-start').value = '';
-  document.getElementById('f-end').value   = '';
-  setTimerUI('idle');
-}
-
-function startTick() {
-  // Tick once immediately, then every second
-  function tick() {
-    if (!timerStartTime) { stopTick(); return; }
-    const elapsed = Math.floor((Date.now() - timerStartTime.getTime()) / 1000);
-    const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
-    const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
-    const s = String(elapsed % 60).padStart(2, '0');
-    document.getElementById('timerDisplay').textContent = `${h}:${m}:${s}`;
-  }
-  tick();
-  timerInterval = setInterval(tick, 1000);
-}
-
-function stopTick() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  document.getElementById('timerDisplay').textContent = '00:00:00';
-}
-
-function setTimerUI(state) {
-  const block   = document.getElementById('timerBlock');
-  const display = document.getElementById('timerDisplay');
-  const status  = document.getElementById('timerStatus');
-  const btnIdle = document.getElementById('timerBtnsIdle');
-  const btnRun  = document.getElementById('timerBtnsRunning');
-  const startBtn = document.querySelector('.btn-timer-start');
-
-  if (state === 'running') {
-    block.classList.add('running');
-    display.classList.add('running');
-    status.textContent = 'Running';
-    btnIdle.classList.add('hidden');
-    btnRun.classList.remove('hidden');
-    startBtn.textContent = '▶ Start Shift';
-  } else if (state === 'ended') {
-    block.classList.remove('running');
-    display.classList.remove('running');
-    status.textContent = 'Ended — fill in earnings below ↓';
-    btnIdle.classList.remove('hidden');
-    btnRun.classList.add('hidden');
-    startBtn.textContent = '▶ New Shift';
-  } else { // idle
-    block.classList.remove('running');
-    display.classList.remove('running');
-    display.textContent = '00:00:00';
-    status.textContent = 'Not started';
-    btnIdle.classList.remove('hidden');
-    btnRun.classList.add('hidden');
-    startBtn.textContent = '▶ Start Shift';
-  }
-}
-
-// Restore timer if app was closed mid-shift
-function restoreTimer() {
-  const saved = localStorage.getItem('dtlog_timer');
-  if (!saved) return;
-  try {
-    const { startTs } = JSON.parse(saved);
-    const start = new Date(startTs);
-    // Discard if more than 20 hours old — definitely stale
-    if (isNaN(start.getTime()) || Date.now() - start.getTime() > 72000000) {
-      localStorage.removeItem('dtlog_timer');
-      return;
-    }
-    timerStartTime = start;
-    document.getElementById('f-date').value  = localDateStr(timerStartTime);
-    updateDOW();
-    document.getElementById('f-start').value =
-      String(timerStartTime.getHours()).padStart(2,'0') + ':' +
-      String(timerStartTime.getMinutes()).padStart(2,'0');
-    setTimerUI('running');
-    startTick();
-  } catch {
-    localStorage.removeItem('dtlog_timer');
-  }
-}
 
 // ══════════════════════════════════════════
 // TABS & FILTERS
@@ -1203,7 +1033,7 @@ function renderWeeklySummary() {
   });
 
   const totEarned = weekEntries.reduce((s,e) => s + e.totalTips, 0);
-  const totHours  = weekEntries.reduce((s,e) => s + e.hours, 0);
+  const totHours  = weekEntries.reduce((s,e) => s + (parseFloat(e.hours)||0), 0);
   const totRuns   = weekEntries.reduce((s,e) => s + (e.runs||0), 0);
   const avgPH     = totHours > 0 ? totEarned / totHours : 0;
   const shifts    = weekEntries.length;
@@ -1253,7 +1083,7 @@ function renderHistory() {
       <div class="log-header">
         <div class="log-date-line">
           <div class="log-date">${fmtDate(e.date)}</div>
-          <div class="log-day">${e.dow} · ${e.tod} · ${e.start}–${e.end}</div>
+          <div class="log-day">${e.dow}${e.hours ? ' · ' + (parseFloat(e.hours)||0).toFixed(2) + 'h' : ''}</div>
         </div>
         <div class="entry-actions">
           <button class="btn-act edit" onclick="editEntry(${e.id})">EDIT</button>
@@ -1265,11 +1095,11 @@ function renderHistory() {
         ${e.weather ? `<span class="badge badge-w">${wIcon(e.weather)} ${e.weather}</span>` : ''}
       </div>
       <div class="log-numbers">
-        <div class="log-num"><span class="n-label">Total Earned</span><span class="n-val n-total">$${e.totalTips.toFixed(2)}</span></div>
-        <div class="log-num"><span class="n-label">Tips Paid</span><span class="n-val n-paid">$${e.tipsPaid.toFixed(2)}</span></div>
-        <div class="log-num"><span class="n-label">Cash Tips</span><span class="n-val n-cash">$${e.cash.toFixed(2)}</span></div>
+        <div class="log-num"><span class="n-label">Total Earned</span><span class="n-val n-total">$${(parseFloat(e.totalTips)||0).toFixed(2)}</span></div>
+        <div class="log-num"><span class="n-label">Tips Paid</span><span class="n-val n-paid">$${(parseFloat(e.tipsPaid)||0).toFixed(2)}</span></div>
+        <div class="log-num"><span class="n-label">Cash Tips</span><span class="n-val n-cash">$${(parseFloat(e.cash)||0).toFixed(2)}</span></div>
         <div class="log-num"><span class="n-label">$/hr</span><span class="n-val" style="color:var(--subtext)">$${e.tph}</span></div>
-        <div class="log-num"><span class="n-label">Hours</span><span class="n-val n-hours">${e.hours.toFixed(1)}h</span></div>
+        <div class="log-num"><span class="n-label">Hours</span><span class="n-val n-hours">${(parseFloat(e.hours)||0).toFixed(2)}h</span></div>
         <div class="log-num"><span class="n-label">${e.miles !== null ? 'Miles' : 'Runs'}</span>
           <span class="n-val ${e.miles !== null ? 'n-miles' : ''}">${e.miles !== null ? e.miles.toFixed(1) : (e.runs || '—')}</span>
         </div>
@@ -1289,7 +1119,7 @@ function renderPaychecks() {
   }
   list.innerHTML = paychecks.map(ck => {
     const shifts     = entries.filter(e => e.date >= ck.start && e.date <= ck.end);
-    const hoursInPd  = shifts.reduce((s,e) => s + e.hours, 0);
+    const hoursInPd  = shifts.reduce((s,e) => s + (parseFloat(e.hours)||0), 0);
     const earnedInPd = shifts.reduce((s,e) => s + e.totalTips, 0);
     const baseHr     = hoursInPd > 0 ? ck.amount / hoursInPd : 0;
     const totalHr    = hoursInPd > 0 ? (ck.amount + earnedInPd) / hoursInPd : 0;
@@ -1332,7 +1162,7 @@ function renderStats() {
   const totCash   = sum('cash');
   const totMiles  = data.filter(e => e.miles !== null).reduce((s,e) => s + e.miles, 0);
   const milesCount= data.filter(e => e.miles !== null).length;
-  const totHours  = sum('hours');
+  const totHours  = data.reduce((s,e) => s + (parseFloat(e.hours)||0), 0);
   const totRuns   = data.reduce((s,e) => s + (e.runs||0), 0);
   const best      = [...data].sort((a,b) => b.totalTips - a.totalTips)[0];
 
@@ -1457,9 +1287,9 @@ function renderStats() {
 // ══════════════════════════════════════════
 function exportCSV() {
   if (!entries.length) { toast('Nothing to export','warn'); return; }
-  const h = ['Date','Day','Start','End','Hours','TimeOfDay','TipsPaidOut','CashTips','TotalEarned','Miles','Runs','TotalPerHour','PerRun','Weather','Holiday','Notes'];
+  const h = ['Date','Day','Hours','TipsPaidOut','CashTips','TotalEarned','Miles','Runs','TipsPerHour','TipsPerRun','Weather','Holiday','Notes'];
   const rows = entries.map(e => [
-    e.date, e.dow, e.start, e.end, e.hours, e.tod,
+    e.date, e.dow, e.hours,
     e.tipsPaid, e.cash, e.totalTips,
     e.miles !== null ? e.miles : '',
     e.runs||0, e.tph, e.tpr,
@@ -1660,7 +1490,9 @@ function localDateStr(d) {
     String(dt.getDate()).padStart(2, '0');
 }
 function fmtDate(s) {
+  if (!s || typeof s !== 'string' || !s.includes('-')) return '—';
   const [y,m,d] = s.split('-').map(Number);
+  if (isNaN(y) || isNaN(m) || isNaN(d)) return '—';
   return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 }
 function wIcon(w) {
