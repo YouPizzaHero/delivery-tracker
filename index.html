@@ -32,6 +32,26 @@
     --mono: 'Share Tech Mono', monospace;
     --head: 'Barlow Condensed', sans-serif;
   }
+
+  /* ── LIGHT MODE ── */
+  body.light {
+    --bg:      #f4f6fa;
+    --panel:   #ffffff;
+    --panel2:  #eef1f7;
+    --border:  #d0d8e8;
+    --muted:   #6b7a99;
+    --text:    #1a2035;
+    --subtext: #4a5568;
+  }
+  body.light .app-header { background:linear-gradient(135deg,#fff7ed,#fff); }
+  body.light .app-header h1 { text-shadow:none; }
+  body.light input, body.light select, body.light textarea { background:var(--panel2); color:var(--text); }
+  body.light .tog { background:var(--panel2); }
+  body.light .timer-block { background:var(--panel2); }
+  body.light .week-summary { background:linear-gradient(135deg,#f0fdf4,#eff6ff); }
+  body.light .storage-bar  { background:#f8f9fc; }
+  body.light .tabs         { background:var(--panel); }
+  body.light .about-hero   { background:linear-gradient(135deg,#fff7ed,#fffbeb); }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { background:var(--bg); color:var(--text); font-family:var(--head); font-size:16px; min-height:100vh; padding-bottom:80px; }
 
@@ -200,6 +220,48 @@
   .ps-label { font-size:.78rem; color:var(--subtext); }
   .ps-val   { font-family:var(--mono); font-size:.82rem; color:var(--text); }
 
+  /* ── SEARCH BAR ── */
+  .search-wrap { position:relative; margin-bottom:12px; }
+  .search-wrap input { padding-left:36px; background:var(--panel2); }
+  .search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:.9rem; pointer-events:none; }
+  .btn-search-clear { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); font-size:1rem; cursor:pointer; padding:2px 6px; line-height:1; }
+
+  /* ── MODE TOGGLE ── */
+  .mode-toggle { background:none; border:1px solid var(--border); border-radius:20px; padding:4px 10px; color:var(--subtext); font-size:.75rem; cursor:pointer; font-family:var(--head); font-weight:700; letter-spacing:1px; text-transform:uppercase; transition:all .2s; }
+  .mode-toggle:active { background:var(--panel2); }
+
+  /* ── PAY PERIOD MODAL ── */
+  .pp-modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:300; display:flex; align-items:flex-start; justify-content:center; padding:20px 16px 40px; overflow-y:auto; }
+  .pp-modal-bg.hidden { display:none; }
+  .pp-modal { background:var(--panel); border:1px solid var(--border); border-radius:16px; width:100%; max-width:480px; overflow:hidden; }
+  .pp-modal-header { background:linear-gradient(135deg,#0e1a1a,#0d1422); padding:18px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:flex-start; }
+  .pp-modal-title { display:flex; flex-direction:column; gap:3px; }
+  .pp-modal-title h3 { font-size:1.2rem; font-weight:900; letter-spacing:1px; text-transform:uppercase; color:var(--teal); }
+  .pp-modal-title p  { font-size:.74rem; color:var(--subtext); font-family:var(--mono); }
+  .btn-pp-close { background:none; border:1px solid var(--border); color:var(--muted); padding:5px 10px; border-radius:6px; cursor:pointer; font-family:var(--head); font-size:.75rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+  .pp-summary-cards { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; padding:16px; border-bottom:1px solid var(--border); }
+  .pp-sc { background:var(--panel2); border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; gap:2px; }
+  .pp-sc .psc-label { font-size:.6rem; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+  .pp-sc .psc-val   { font-family:var(--mono); font-size:1rem; font-weight:bold; }
+  .pp-shifts { padding:12px 16px 20px; }
+  .pp-shifts-title { font-size:.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--subtext); margin-bottom:10px; }
+  .pp-shift-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); gap:8px; }
+  .pp-shift-row:last-child { border-bottom:none; }
+  .pp-shift-left { display:flex; flex-direction:column; gap:2px; }
+  .pp-shift-date { font-size:.82rem; font-weight:700; color:var(--text); }
+  .pp-shift-meta { font-size:.68rem; color:var(--muted); font-family:var(--mono); }
+  .pp-shift-right { display:flex; flex-direction:column; align-items:flex-end; gap:1px; }
+  .pp-shift-earned { font-family:var(--mono); font-size:.95rem; font-weight:bold; color:var(--green); }
+  .pp-shift-hours  { font-size:.68rem; color:var(--muted); font-family:var(--mono); }
+  .pp-empty { text-align:center; padding:24px; color:var(--muted); font-size:.82rem; }
+
+  /* ── SORT BAR ── */
+  .sort-bar { display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .sort-label { font-size:.68rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); flex-shrink:0; }
+  .sort-btn { padding:5px 12px; border-radius:20px; border:1px solid var(--border); background:var(--panel2); color:var(--subtext); font-size:.7rem; font-weight:700; letter-spacing:.5px; cursor:pointer; font-family:var(--head); text-transform:uppercase; transition:all .15s; display:flex; align-items:center; gap:4px; }
+  .sort-btn.active { background:var(--blue); border-color:var(--blue); color:#000; }
+  .sort-arrow { font-size:.7rem; }
+
   /* ── WEEKLY SUMMARY BANNER ── */
   .week-summary { background:linear-gradient(135deg,#0e1a10,#0d1422); border:1px solid var(--border); border-left:3px solid var(--green); border-radius:10px; padding:14px 16px; margin-bottom:14px; }
   .ws-title { font-size:.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--green); margin-bottom:10px; }
@@ -271,7 +333,28 @@
 
 <div class="app-header">
   <h1><span style="cursor:pointer" onclick="openAbout()" title="About">🍕</span> Delivery <span>Log</span></h1>
-  <div class="header-right"><div class="header-meta" id="headerMeta"></div></div>
+  <div class="header-right">
+    <div class="header-meta" id="headerMeta"></div>
+    <button class="mode-toggle" id="modeToggle" onclick="toggleMode()">☀️ Light</button>
+  </div>
+</div>
+
+<!-- ══ PAY PERIOD MODAL ══ -->
+<div class="pp-modal-bg hidden" id="ppModal">
+  <div class="pp-modal">
+    <div class="pp-modal-header">
+      <div class="pp-modal-title">
+        <h3 id="ppModalTitle">Pay Period</h3>
+        <p id="ppModalRange"></p>
+      </div>
+      <button class="btn-pp-close" onclick="closePPModal()">✕ Close</button>
+    </div>
+    <div class="pp-summary-cards" id="ppSummaryCards"></div>
+    <div class="pp-shifts">
+      <div class="pp-shifts-title">Shifts in this period</div>
+      <div id="ppShiftList"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ ABOUT MODAL ══ -->
@@ -414,11 +497,25 @@
 <div class="panel" id="panel-history">
   <!-- Weekly summary banner -->
   <div class="week-summary" id="weekSummary"></div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="historySearch" placeholder="Search date, note, holiday, weather…" oninput="renderHistory()">
+    <button class="btn-search-clear" onclick="clearSearch()" title="Clear">✕</button>
+  </div>
   <div class="filter-bar">
     <button class="filter-btn active" onclick="setHF('all',this)">All</button>
     <button class="filter-btn" onclick="setHF('week',this)">This Week</button>
     <button class="filter-btn" onclick="setHF('month',this)">This Month</button>
     <button class="filter-btn" onclick="setHF('holidays',this)">Holidays</button>
+  </div>
+  <div class="sort-bar" id="h-sort-bar">
+    <span class="sort-label">Sort</span>
+    <button class="sort-btn active" id="hs-date-desc" onclick="setHSort('date-desc',this)">Date <span class="sort-arrow">↓</span></button>
+    <button class="sort-btn" id="hs-date-asc"  onclick="setHSort('date-asc',this)">Date <span class="sort-arrow">↑</span></button>
+    <button class="sort-btn" id="hs-earned-desc" onclick="setHSort('earned-desc',this)">Earned <span class="sort-arrow">↓</span></button>
+    <button class="sort-btn" id="hs-earned-asc"  onclick="setHSort('earned-asc',this)">Earned <span class="sort-arrow">↑</span></button>
+    <button class="sort-btn" id="hs-hours-desc" onclick="setHSort('hours-desc',this)">Hours <span class="sort-arrow">↓</span></button>
+    <button class="sort-btn" id="hs-hours-asc"  onclick="setHSort('hours-asc',this)">Hours <span class="sort-arrow">↑</span></button>
   </div>
   <div id="log-list"></div>
   <button class="btn-secondary btn-csv" onclick="exportCSV()">⬇ Export CSV</button>
@@ -493,6 +590,18 @@
     <button class="filter-btn active" onclick="setSF('week',this)">This Week</button>
     <button class="filter-btn" onclick="setSF('month',this)">This Month</button>
     <button class="filter-btn" onclick="setSF('all',this)">All Time</button>
+    <button class="filter-btn" onclick="setSF('custom',this)">Custom</button>
+  </div>
+  <!-- Custom date range (shown when Custom is selected) -->
+  <div class="hidden" id="stats-custom-range" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+    <div class="field" style="flex:1;min-width:120px">
+      <label style="font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--subtext)">From</label>
+      <input type="date" id="stats-from" onchange="renderStats()">
+    </div>
+    <div class="field" style="flex:1;min-width:120px">
+      <label style="font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--subtext)">To</label>
+      <input type="date" id="stats-to" onchange="renderStats()">
+    </div>
   </div>
   <!-- Weekly goal setter -->
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
@@ -571,6 +680,8 @@ let weatherSel = null;
 let holidaySel = '';
 let hFilter    = 'all';
 let sFilter    = 'week';
+let hSort      = 'date-desc';   // history sort: date-desc | date-asc | earned-desc | earned-asc | hours-desc | hours-asc
+let sSort      = 'date-desc';   // stats sort (same options)
 let editingId  = null;
 let catSel     = null;
 let eFilter    = 'all';
@@ -983,32 +1094,76 @@ function switchTab(name, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active'); btn.classList.add('active');
 }
+function sortEntries(arr, sortKey) {
+  return [...arr].sort((a, b) => {
+    switch (sortKey) {
+      case 'date-desc':   return (b.date||'') > (a.date||'') ? 1 : -1;
+      case 'date-asc':    return (a.date||'') > (b.date||'') ? 1 : -1;
+      case 'earned-desc': return (parseFloat(b.totalTips)||0) - (parseFloat(a.totalTips)||0);
+      case 'earned-asc':  return (parseFloat(a.totalTips)||0) - (parseFloat(b.totalTips)||0);
+      case 'hours-desc':  return (parseFloat(b.hours)||0) - (parseFloat(a.hours)||0);
+      case 'hours-asc':   return (parseFloat(a.hours)||0) - (parseFloat(b.hours)||0);
+      default:            return 0;
+    }
+  });
+}
+
+function setHSort(s, btn) {
+  hSort = s;
+  document.querySelectorAll('#h-sort-bar .sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory();
+}
+
 function setHF(f, btn) {
   hFilter = f;
   document.querySelectorAll('#panel-history .filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active'); renderHistory();
+  btn.classList.add('active');
+  renderHistory();
 }
+
 function setSF(f, btn) {
   sFilter = f;
   document.querySelectorAll('#panel-stats .filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active'); renderStats();
+  btn.classList.add('active');
+  const customRange = document.getElementById('stats-custom-range');
+  if (f === 'custom') {
+    customRange.classList.remove('hidden');
+    customRange.style.display = 'flex';
+    const now = new Date();
+    if (!document.getElementById('stats-from').value)
+      document.getElementById('stats-from').value = localDateStr(new Date(now.getFullYear(), now.getMonth(), 1));
+    if (!document.getElementById('stats-to').value)
+      document.getElementById('stats-to').value = localDateStr(now);
+  } else {
+    customRange.classList.add('hidden');
+    customRange.style.display = 'none';
+  }
+  renderStats();
 }
 
 function filtered(p) {
   const now = new Date(); now.setHours(0,0,0,0);
   return entries.filter(e => {
+    if (!e.date) return false;
     if (p === 'all')      return true;
     if (p === 'holidays') return !!e.holiday;
     const d = new Date(e.date + 'T00:00:00');
-    if (p === 'week')  {
+    if (p === 'week') {
       const ws = new Date(now);
       const day = now.getDay();
-      // Monday = start of week. getDay(): 0=Sun,1=Mon...6=Sat
       const daysBack = day === 0 ? 6 : day - 1;
       ws.setDate(now.getDate() - daysBack);
       return d >= ws;
     }
-    if (p === 'month') return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+    if (p === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    if (p === 'custom') {
+      const from = document.getElementById('stats-from').value;
+      const to   = document.getElementById('stats-to').value;
+      if (from && e.date < from) return false;
+      if (to   && e.date > to)   return false;
+      return true;
+    }
     return true;
   });
 }
@@ -1073,7 +1228,7 @@ function renderWeeklySummary() {
 function renderHistory() {
   renderWeeklySummary();
   const list = document.getElementById('log-list');
-  const data = filtered(hFilter);
+  const data = applySearch(sortEntries(filtered(hFilter), hSort));
   if (!data.length) {
     list.innerHTML = `<div class="empty"><div class="e-icon">🚗</div><p>No shifts logged yet.</p></div>`;
     return;
@@ -1120,14 +1275,21 @@ function renderPaychecks() {
   list.innerHTML = paychecks.map(ck => {
     const shifts     = entries.filter(e => e.date >= ck.start && e.date <= ck.end);
     const hoursInPd  = shifts.reduce((s,e) => s + (parseFloat(e.hours)||0), 0);
-    const earnedInPd = shifts.reduce((s,e) => s + e.totalTips, 0);
+    const earnedInPd = shifts.reduce((s,e) => s + (parseFloat(e.totalTips)||0), 0);
     const baseHr     = hoursInPd > 0 ? ck.amount / hoursInPd : 0;
     const totalHr    = hoursInPd > 0 ? (ck.amount + earnedInPd) / hoursInPd : 0;
     return `<div class="check-entry">
-      <button class="btn-act del" style="position:absolute;top:10px;right:10px" onclick="delPaycheck(${ck.id})">DEL</button>
-      <div class="check-amount">$${ck.amount.toFixed(2)}</div>
-      <div class="check-range">📅 ${fmtDate(ck.start)} → ${fmtDate(ck.end)}</div>
-      ${ck.note ? `<div class="check-note">📝 ${ck.note}</div>` : ''}
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          <div class="check-amount">$${ck.amount.toFixed(2)}</div>
+          <div class="check-range">📅 ${fmtDate(ck.start)} → ${fmtDate(ck.end)}</div>
+          ${ck.note ? `<div class="check-note">📝 ${ck.note}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0;margin-left:8px">
+          <button class="btn-act" style="color:var(--teal);border-color:var(--teal)" onclick="openPPModal(${ck.id})">VIEW</button>
+          <button class="btn-act del" onclick="delPaycheck(${ck.id})">DEL</button>
+        </div>
+      </div>
       <div class="check-meta">
         <div class="check-meta-item"><span class="cm-label">Hours Logged</span><span class="cm-val">${hoursInPd.toFixed(1)}h</span></div>
         <div class="check-meta-item"><span class="cm-label">Base $/hr</span><span class="cm-val" style="color:var(--blue)">$${baseHr.toFixed(2)}</span></div>
@@ -1471,6 +1633,93 @@ function saveWeekGoal(val) {
   if (n > 0) localStorage.setItem('dtlog_weekgoal', n);
   else localStorage.removeItem('dtlog_weekgoal');
   renderWeeklySummary();
+}
+
+// ══════════════════════════════════════════
+// DARK / LIGHT MODE
+// ══════════════════════════════════════════
+function toggleMode() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('dtlog_mode', isLight ? 'light' : 'dark');
+  document.getElementById('modeToggle').textContent = isLight ? '🌙 Dark' : '☀️ Light';
+}
+// Restore mode on load
+(function restoreMode() {
+  if (localStorage.getItem('dtlog_mode') === 'light') {
+    document.body.classList.add('light');
+    document.getElementById('modeToggle').textContent = '🌙 Dark';
+  }
+})();
+
+// ══════════════════════════════════════════
+// HISTORY SEARCH
+// ══════════════════════════════════════════
+function clearSearch() {
+  document.getElementById('historySearch').value = '';
+  renderHistory();
+}
+
+function applySearch(data) {
+  const q = (document.getElementById('historySearch')?.value || '').trim().toLowerCase();
+  if (!q) return data;
+  return data.filter(e => {
+    const searchable = [
+      e.date || '',
+      e.dow  || '',
+      e.notes || '',
+      e.holiday || '',
+      e.weather || '',
+      fmtDate(e.date),
+    ].join(' ').toLowerCase();
+    return searchable.includes(q);
+  });
+}
+
+// ══════════════════════════════════════════
+// PAY PERIOD MODAL
+// ══════════════════════════════════════════
+function openPPModal(ckId) {
+  const ck = paychecks.find(p => p.id === ckId);
+  if (!ck) return;
+
+  const shifts     = entries.filter(e => e.date >= ck.start && e.date <= ck.end)
+                            .sort((a,b) => (a.date||'') > (b.date||'') ? 1 : -1);
+  const hoursInPd  = shifts.reduce((s,e) => s + (parseFloat(e.hours)||0), 0);
+  const earnedInPd = shifts.reduce((s,e) => s + (parseFloat(e.totalTips)||0), 0);
+  const totalHr    = hoursInPd > 0 ? (ck.amount + earnedInPd) / hoursInPd : 0;
+  const runsInPd   = shifts.reduce((s,e) => s + (e.runs||0), 0);
+
+  document.getElementById('ppModalTitle').textContent = ck.note || 'Pay Period';
+  document.getElementById('ppModalRange').textContent =
+    `${fmtDate(ck.start)} → ${fmtDate(ck.end)}`;
+
+  document.getElementById('ppSummaryCards').innerHTML = `
+    <div class="pp-sc"><span class="psc-label">Check</span><span class="psc-val" style="color:var(--teal)">$${ck.amount.toFixed(2)}</span></div>
+    <div class="pp-sc"><span class="psc-label">Tips Earned</span><span class="psc-val" style="color:var(--green)">$${earnedInPd.toFixed(2)}</span></div>
+    <div class="pp-sc"><span class="psc-label">Combined $/hr</span><span class="psc-val" style="color:var(--amber)">$${totalHr.toFixed(2)}</span></div>
+    <div class="pp-sc"><span class="psc-label">Hours</span><span class="psc-val">${hoursInPd.toFixed(1)}h</span></div>
+    <div class="pp-sc"><span class="psc-label">Shifts</span><span class="psc-val">${shifts.length}</span></div>
+    <div class="pp-sc"><span class="psc-label">Total Runs</span><span class="psc-val">${runsInPd}</span></div>`;
+
+  document.getElementById('ppShiftList').innerHTML = shifts.length
+    ? shifts.map(e => `
+      <div class="pp-shift-row">
+        <div class="pp-shift-left">
+          <span class="pp-shift-date">${fmtDate(e.date)}</span>
+          <span class="pp-shift-meta">${e.dow || ''}${e.hours ? ' · ' + (parseFloat(e.hours)||0).toFixed(2) + 'h' : ''}${e.runs ? ' · ' + e.runs + ' runs' : ''}</span>
+        </div>
+        <div class="pp-shift-right">
+          <span class="pp-shift-earned">$${(parseFloat(e.totalTips)||0).toFixed(2)}</span>
+          <span class="pp-shift-hours">$${(parseFloat(e.tph)||0).toFixed(2)}/hr</span>
+        </div>
+      </div>`).join('')
+    : `<div class="pp-empty">No shifts logged in this period.</div>`;
+
+  document.getElementById('ppModal').classList.remove('hidden');
+}
+
+function closePPModal() {
+  document.getElementById('ppModal').classList.add('hidden');
 }
 
 function openAbout()  { document.getElementById('aboutModal').classList.remove('hidden'); }
